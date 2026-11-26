@@ -105,6 +105,26 @@ section.page{min-width:0}
  .day b{font-size:13px}
  .pill{font-size:9px;padding:7px}
 }
+
+.exercise-tools{display:grid;grid-template-columns:1.5fr 1fr;gap:10px;margin:16px 0}
+.exercise-tools input,.exercise-tools select{width:100%}
+.exercise-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:14px;margin-top:16px}
+.exercise-card{background:#111812;border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;transition:.2s}
+.exercise-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.exercise-visual{height:190px;background:#182019;position:relative;overflow:hidden}
+.exercise-visual img{position:absolute;width:100%;height:100%;object-fit:contain;padding:10px;transition:opacity .8s}
+.exercise-visual img.peak{opacity:0;animation:exerciseMove 2.4s ease-in-out infinite alternate}
+@keyframes exerciseMove{0%,35%{opacity:0}65%,100%{opacity:1}}
+.exercise-copy{padding:13px}.exercise-copy strong{display:block;font-size:14px;min-height:34px}
+.exercise-copy small{display:block;color:var(--muted);margin-top:7px}
+.exercise-chip{display:inline-block;background:#202b1c;color:var(--green);border-radius:20px;padding:4px 8px;font-size:10px;margin:4px 4px 0 0}
+.exercise-detail{background:#101711;border:1px solid #40522f;border-radius:12px;padding:18px;margin-top:16px}
+.exercise-detail img{width:100%;max-width:240px;display:block;margin:auto;background:#1a241b;border-radius:10px}
+.exercise-detail ol{padding-left:22px;color:#d4ddd2;line-height:1.7}.exercise-detail li{margin:7px 0}
+.exercise-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.exercise-count{color:var(--muted);font-size:12px;margin:12px 0}
+@media(max-width:600px){.exercise-tools{grid-template-columns:1fr}.exercise-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.exercise-visual{height:145px}.exercise-copy{padding:10px}.exercise-copy strong{font-size:12px}}
+
 </style>
 </head>
 <body>
@@ -145,6 +165,7 @@ section.page{min-width:0}
   <button class="navbtn" onclick="tab('workout',this)">▤　Antrenmanlar</button>
   <button class="navbtn" onclick="tab('nutrition',this)">◉　Beslenme</button>
   <button class="navbtn" onclick="tab('history',this)">▥　Kayıtlarım</button>
+  <button class="navbtn" onclick="tab('exercises',this)">💪　Hareket Kütüphanesi</button>
   <div class="navlabel">HESAP</div>
   <button class="navbtn" onclick="logout()">↪　Çıkış Yap</button>
   <div class="sidebottom">NEXFIT PERFORMANCE<br>BUILD YOUR BEST SELF.</div>
@@ -249,6 +270,22 @@ section.page{min-width:0}
    </div>
   </section>
 
+
+  <section id="exercises" class="page hidden">
+   <div class="card"><div class="eyebrow">EXERCISE LIBRARY</div><h1>Hareket <span class="green">Kütüphanesi</span></h1>
+   <p class="muted">Makine, dambıl, halter, kablo ve vücut ağırlığı hareketlerini keşfet. Görseller iki poz arasında geçiş yapar.</p></div>
+   <div class="card" style="margin-top:16px">
+    <div class="exercise-tools">
+     <input id="exerciseSearch" type="search" placeholder="Hareket veya kas ara..." oninput="filterExercises()">
+     <select id="exerciseCategory" onchange="filterExercises()"><option value="">Tüm bölgeler</option><option value="chest">Göğüs</option><option value="back">Sırt</option><option value="shoulders">Omuz</option><option value="arms">Kol</option><option value="legs">Bacak</option><option value="waist">Karın</option><option value="cardio">Kardiyo</option><option value="stretching">Esneme</option></select>
+     <select id="exerciseEquipment" onchange="filterExercises()"><option value="">Tüm ekipmanlar</option><option value="machine">Makine</option><option value="dumbbell">Dambıl</option><option value="barbell">Halter</option><option value="cable">Kablo</option><option value="bodyweight">Vücut ağırlığı</option><option value="other">Diğer</option></select>
+    </div>
+    <div class="exercise-count" id="exerciseCount">Hareket listesi yükleniyor...</div>
+    <div id="exerciseGrid" class="exercise-grid"></div><div id="exerciseDetail"></div>
+    <p class="sourcehint">Exercise data by <a href="https://repdb.co" target="_blank" rel="nofollow">RepDB (repdb.co)</a>. Ücretsiz görseller gerçek video değildir; başlangıç ve bitiş pozları arasında geçişli gösterilir.</p>
+   </div>
+  </section>
+
   <section id="history" class="page hidden">
    <div class="card">
     <div class="eyebrow">YOUR PROGRESS</div>
@@ -329,12 +366,13 @@ async function logout(){
  setMode("login");
 }
 function tab(id,btn){
- ["dashboard","workout","nutrition","history"].forEach(x=>$(x).classList.toggle("hidden",x!==id));
+ ["dashboard","workout","nutrition","history","exercises"].forEach(x=>$(x).classList.toggle("hidden",x!==id));
  document.querySelectorAll(".navbtn").forEach(x=>x.classList.remove("active"));
  if(btn)btn.classList.add("active");
- $("welcome").textContent={dashboard:"Genel Bakış",workout:"Antrenman Merkezi",nutrition:"Beslenme Merkezi",history:"Kayıtlarım"}[id];
+ $("welcome").textContent={dashboard:"Genel Bakış",workout:"Antrenman Merkezi",nutrition:"Beslenme Merkezi",history:"Kayıtlarım",exercises:"Hareket Kütüphanesi"}[id];
  if(id==="dashboard"||id==="history")loadData();
  if(id==="nutrition")loadFoodCatalog();
+ if(id==="exercises")loadExercises();
 }
 function addRecord(parent,title,desc){
  const d=document.createElement("div");d.className="record";
@@ -748,6 +786,17 @@ async function loadData(){
   week.append(el);
  }
 }
+
+
+let exerciseData=[];
+let visibleExercises=[];
+const exerciseTurkish={"chest":"Göğüs","back":"Sırt","shoulders":"Omuz","upper arms":"Kol","lower arms":"Ön kol","arms":"Kol","upper legs":"Bacak","lower legs":"Alt bacak","waist":"Karın","cardio":"Kardiyo","neck":"Boyun","full body":"Tüm vücut","strength":"Kuvvet","stretching":"Esneme","olympic":"Olimpik kaldırış","plyometrics":"Patlayıcı kuvvet","machine":"Makine","dumbbell":"Dambıl","barbell":"Halter","cable":"Kablo","bodyweight":"Vücut ağırlığı","kettlebell":"Kettlebell","band":"Direnç bandı","beginner":"Başlangıç","intermediate":"Orta","advanced":"İleri","compound":"Bileşik hareket","isolation":"İzolasyon","pectoralis major":"Göğüs kası","latissimus dorsi":"Kanat kası","deltoids":"Omuz kasları","biceps brachii":"Biceps","triceps brachii":"Triceps","quadriceps":"Ön bacak","hamstrings":"Arka bacak","gluteus maximus":"Kalça","rectus abdominis":"Karın kası","gastrocnemius":"Baldır","soleus":"Soleus"};
+function trExercise(v){const s=String(v||"").replace(/-/g," ").replace(/_/g," ");return exerciseTurkish[s.toLowerCase()]||s.replace(/\b\w/g,x=>x.toLocaleUpperCase("tr-TR"))}
+function exerciseRegion(e){const b=(e.body_part||"").toLowerCase();if(/chest/.test(b))return "chest";if(/back/.test(b))return "back";if(/shoulder/.test(b))return "shoulders";if(/arm|biceps|triceps|forearm/.test(b))return "arms";if(/leg|thigh|calf|glute/.test(b))return "legs";if(/waist|abdom/.test(b))return "waist";if(e.category==="cardio")return "cardio";if(e.category==="stretching")return "stretching";return ""}
+function exerciseEquipGroup(e){const q=(e.equipment||"").toLowerCase();if(!q)return "bodyweight";if(/machine|smith/.test(q))return "machine";if(/dumbbell/.test(q))return "dumbbell";if(/barbell/.test(q))return "barbell";if(/cable/.test(q))return "cable";if(e.is_bodyweight)return "bodyweight";return "other"}
+async function loadExercises(){const count=$("exerciseCount");count.textContent="Hareketler yükleniyor...";try{const res=await fetch("https://exercise-dataset.com/exercises.json");if(!res.ok)throw new Error("Hareket listesine ulaşılamadı.");const data=await res.json();exerciseData=data.exercises||[];filterExercises()}catch(err){count.textContent="Hareketler yüklenemedi. Sayfayı yenileyip tekrar dene."}}
+function filterExercises(){if(!exerciseData.length)return;const q=($("exerciseSearch").value||"").toLocaleLowerCase("tr-TR").trim(),cat=$("exerciseCategory").value,eq=$("exerciseEquipment").value;visibleExercises=exerciseData.filter(e=>{const hay=[e.name_en,e.body_part,e.equipment,...(e.primary_muscles||[]),...(e.secondary_muscles||[])].join(" ").toLocaleLowerCase("tr-TR");return (!q||hay.includes(q))&&(!cat||exerciseRegion(e)===cat)&&(!eq||exerciseEquipGroup(e)===eq)});$("exerciseCount").textContent=visibleExercises.length+" / "+exerciseData.length+" hareket gösteriliyor";const grid=$("exerciseGrid");grid.replaceChildren();visibleExercises.slice(0,120).forEach(e=>{const card=document.createElement("article");card.className="exercise-card";card.onclick=()=>showExercise(e.id);const visual=document.createElement("div");visual.className="exercise-visual";const start=e.images?.flat?.start||e.images?.flat?.main,peak=e.images?.flat?.peak;if(start){const im=document.createElement("img");im.loading="lazy";im.alt=e.name_en;im.src="https://exercise-dataset.com/"+start;visual.append(im)}if(peak){const im2=document.createElement("img");im2.className="peak";im2.loading="lazy";im2.alt="Hareketin bitiş pozisyonu";im2.src="https://exercise-dataset.com/"+peak;visual.append(im2)}const copy=document.createElement("div");copy.className="exercise-copy";const title=document.createElement("strong");title.textContent=trExercise(e.name_en);const meta=document.createElement("small");meta.textContent=trExercise(e.body_part)+" · "+trExercise(e.equipment||"bodyweight");const chip=document.createElement("span");chip.className="exercise-chip";chip.textContent=trExercise(e.difficulty);copy.append(title,meta,chip);card.append(visual,copy);grid.append(card)});if(visibleExercises.length>120){const note=document.createElement("p");note.className="muted";note.textContent="İlk 120 sonuç gösteriliyor. Daha fazla daraltmak için arama veya filtre kullan.";grid.append(note)}}
+function showExercise(id){const e=exerciseData.find(x=>x.id===id);if(!e)return;const box=$("exerciseDetail");box.replaceChildren();const title=document.createElement("h2");title.textContent=trExercise(e.name_en);const img=document.createElement("img");img.src="https://exercise-dataset.com/"+(e.images?.flat?.start||e.images?.flat?.main||"");img.alt=title.textContent;const desc=document.createElement("p");desc.className="muted";desc.textContent=e.description_en||"";const muscles=document.createElement("p");muscles.textContent="Çalışan kaslar: "+[...(e.primary_muscles||[]),...(e.secondary_muscles||[])].map(trExercise).join(", ");const equip=document.createElement("p");equip.className="muted";equip.textContent="Ekipman: "+trExercise(e.equipment||"bodyweight")+" · Zorluk: "+trExercise(e.difficulty);const h=document.createElement("h3");h.textContent="Nasıl yapılır?";const ol=document.createElement("ol");(e.instructions_en||[]).forEach(s=>{const li=document.createElement("li");li.textContent=s;ol.append(li)});const tipHead=document.createElement("h3");tipHead.textContent="Teknik ipuçları";const tips=document.createElement("ul");(e.tips_en||[]).forEach(s=>{const li=document.createElement("li");li.textContent=s;tips.append(li)});const actions=document.createElement("div");actions.className="exercise-actions";const add=document.createElement("button");add.className="btn";add.textContent="＋ Antrenmana ekle";add.onclick=()=>{$("exercise").value=trExercise(e.name_en);tab("workout",document.querySelectorAll(".navbtn")[1]);say("Hareket antrenman formuna eklendi. Set, tekrar ve ağırlığı girip kaydedebilirsin.");window.scrollTo({top:0,behavior:"smooth"})};const close=document.createElement("button");close.className="btn dark";close.textContent="Kapat";close.onclick=()=>box.replaceChildren();actions.append(add,close);box.className="exercise-detail";box.append(title,img,desc,muscles,equip,h,ol,tipHead,tips,actions);box.scrollIntoView({behavior:"smooth",block:"start"})}
 
 (async()=>{
  const {data}=await db.auth.getSession();
