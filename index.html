@@ -157,7 +157,8 @@ section.page{min-width:0}
 .exercise-copy{padding:13px}.exercise-copy strong{display:block;font-size:14px;min-height:34px}
 .exercise-copy small{display:block;color:var(--muted);margin-top:7px}
 .exercise-chip{display:inline-block;background:#202b1c;color:var(--green);border-radius:20px;padding:4px 8px;font-size:10px;margin:4px 4px 0 0}
-.exercise-video-panel{margin:16px 0;padding:14px;background:linear-gradient(145deg,#172319,#0d130e);border:1px solid rgba(186,255,53,.24);border-radius:14px}.exercise-video-panel h3{margin:0 0 10px}.exercise-video-frame{width:100%;max-height:340px;display:block;object-fit:contain;background:#050705;border-radius:10px}.exercise-video-controls{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.exercise-video-controls button{border:1px solid #40513b;background:#18231a;color:#e7f0e3;padding:8px 13px;border-radius:9px;cursor:pointer}.exercise-video-controls button.active{background:var(--green);color:#101609;border-color:var(--green);font-weight:800}.exercise-video-note{font-size:11px;color:var(--muted);margin:8px 0 0}.exercise-video-loading{padding:14px;border:1px dashed #43533e;border-radius:10px;color:var(--muted);margin:14px 0}
+.exercise-video-panel{margin:16px 0;padding:14px;background:linear-gradient(145deg,#172319,#0d130e);border:1px solid rgba(186,255,53,.24);border-radius:14px}.exercise-video-panel h3{margin:0 0 10px}.exercise-video-frame{width:100%;max-height:340px;display:block;object-fit:contain;background:#050705;border-radius:10px}.exercise-video-controls{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.exercise-video-controls button{border:1px solid #40513b;background:#18231a;color:#e7f0e3;padding:8px 13px;border-radius:9px;cursor:pointer}.exercise-video-controls button.active{background:var(--green);color:#101609;border-color:var(--green);font-weight:800}.exercise-coaching-notes{margin-top:12px;padding:12px;background:rgba(0,0,0,.18);border-radius:10px}.exercise-coaching-notes h4{margin:8px 0;color:var(--green)}.exercise-coaching-notes ul{padding-left:20px;color:#d6e0d2;line-height:1.55}.exercise-coaching-notes li{margin:5px 0}.exercise-coaching-notes p{color:#d6e0d2;font-size:13px}
+.exercise-video-note{font-size:11px;color:var(--muted);margin:8px 0 0}.exercise-video-loading{padding:14px;border:1px dashed #43533e;border-radius:10px;color:var(--muted);margin:14px 0}
 .exercise-detail{background:#101711;border:1px solid #40522f;border-radius:12px;padding:18px;margin-top:16px}
 .exercise-detail img{width:100%;max-width:240px;display:block;margin:auto;background:#1a241b;border-radius:10px}
 .exercise-detail ol{padding-left:22px;color:#d4ddd2;line-height:1.7}.exercise-detail li{margin:7px 0}
@@ -1193,6 +1194,12 @@ async function loadExerciseDemoVideo(exercise,panel){
   male.onclick=()=>setVideo("male");female.onclick=()=>setVideo("female");controls.append(male,female);
   panel.replaceChildren(panel.querySelector("h3"),video,controls);if(best.videos.male)setVideo("male");else setVideo("female");
   const note=document.createElement("p");note.className="exercise-video-note";note.textContent="Açık kaynak egzersiz video kütüphanesi. Otomatik eşleşme nedeniyle hareket adını ve tekniği kontrol et.";panel.append(note);
+  const coaching=document.createElement("div");coaching.className="exercise-coaching-notes";
+  const addCoachList=(heading,values)=>{if(!Array.isArray(values)||!values.length)return;const h=document.createElement("h4");h.textContent=heading;const ul=document.createElement("ul");values.forEach(value=>{const li=document.createElement("li");li.textContent=value;ul.append(li)});coaching.append(h,ul)};
+  addCoachList("✓ Teknik kontrol noktaları",best.formCues);
+  addCoachList("⚠ Sık yapılan hatalar",best.commonMistakes);
+  if(best.breathing){const breath=document.createElement("p");breath.textContent="Nefes: "+best.breathing;coaching.append(breath)}
+  if(coaching.childNodes.length)panel.append(coaching);
  }catch(error){status.textContent="Video servisine şu an ulaşılamıyor. Hareket görselleri ve teknik anlatım kullanılabilir."}
 }
 
