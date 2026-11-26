@@ -76,6 +76,7 @@ h3{font-size:15px;margin:0 0 9px}
 .day{background:#1b211c;border-radius:8px;text-align:center;padding:12px 2px;font-size:11px;color:#9aa49a}
 .day b{display:block;font-size:15px;color:white;margin-bottom:8px}
 .day.done{border:1px solid #80b92c;color:var(--green)}
+.nexfit-calendar-card{overflow:hidden}.calendar-nav{display:flex;align-items:center;gap:9px}.calendar-nav strong{min-width:112px;text-align:center;font-size:13px;color:#eaf3e7}.calendar-nav .btn{padding:7px 12px;min-width:34px}.calendar-weekdays,.workout-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}.calendar-weekdays{margin:18px 0 8px;text-align:center;color:#8c9a8d;font-size:11px;font-weight:700}.calendar-day{position:relative;min-height:54px;border:1px solid #29352a;border-radius:10px;background:#101711;color:#e6eee3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;font:inherit}.calendar-day:hover{border-color:#a8ef36}.calendar-day.muted-day{opacity:.35}.calendar-day.selected{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset}.calendar-day.today-day{background:#1b2a17}.calendar-day .date-num{font-size:13px;font-weight:800}.calendar-day .calendar-markers{display:flex;gap:4px;min-height:6px}.calendar-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#849184}.calendar-dot.training{background:#baff35}.calendar-dot.meal{background:#55b9ff}.calendar-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:13px;color:#9ba79a;font-size:11px}.calendar-legend span{display:flex;align-items:center;gap:6px}.calendar-details{margin-top:14px;padding:13px;border-radius:11px;background:#0c120d;border:1px solid #263326}.calendar-details h3{margin:0 0 10px;font-size:14px}.calendar-entry{padding:9px 0;border-top:1px solid #253026;font-size:12px;color:#d8e2d5}.calendar-entry small{display:block;color:#8e9b8d;margin-top:3px}.calendar-empty{color:#899689;font-size:12px}@media(max-width:520px){.calendar-day{min-height:45px;border-radius:8px}.calendar-weekdays,.workout-calendar-grid{gap:4px}.calendar-nav strong{min-width:94px;font-size:11px}.calendar-day .date-num{font-size:12px}}
 .progress-kpis{grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 0 22px}.progress-kpi{background:#0c120d;border:1px solid #2b392c;border-radius:12px;padding:15px;min-width:0}.progress-kpi small{display:block;color:#8d9a8d;font-size:9px;letter-spacing:1px;line-height:1.5}.progress-kpi b{display:block;color:var(--green);font-size:clamp(19px,3vw,27px);margin-top:8px;overflow-wrap:anywhere}.progress-chart-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 10px}.progress-chart-head h3{margin:0}.progress-chart-head select{max-width:230px;width:48%;margin:0}.progress-chart{min-height:150px;display:flex;align-items:end;gap:8px;padding:14px 8px 0;border-bottom:1px solid #344034}.progress-bar-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:end;height:145px;gap:7px}.progress-bar{width:min(34px,75%);min-height:4px;background:linear-gradient(180deg,#caff59,#75ad18);border-radius:7px 7px 2px 2px;box-shadow:0 0 14px #b7ff2720}.progress-bar-col small{font-size:9px;color:#a2afa2;white-space:nowrap}.progress-bar-col span{font-size:10px;color:#dce7da}.personal-records{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}.pr-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;background:#0d130e;border:1px solid #29372a;border-radius:10px}.pr-item b{font-size:12px}.pr-item strong{color:var(--green);white-space:nowrap}.progress-empty{width:100%;align-self:center;text-align:center;color:var(--muted);font-size:12px;padding:30px 0}@media(max-width:600px){.progress-kpis{gap:7px}.progress-kpi{padding:10px}.progress-kpi small{font-size:8px}.progress-chart-head{align-items:flex-start;flex-direction:column}.progress-chart-head select{width:100%;max-width:none}.progress-chart{gap:4px}.progress-bar-col{height:125px}.progress-bar-col small{font-size:8px}}.record-with-delete{display:flex;align-items:center;justify-content:space-between;gap:12px}.record-info{display:flex;flex-direction:column;gap:5px;min-width:0}.record-info small{overflow-wrap:anywhere}.record-delete{flex-shrink:0;border:1px solid #623b3b;background:#241515;color:#ff8b8b;border-radius:9px;padding:8px 13px;font-weight:700}.record-delete:hover{background:#3a1c1c}.record-delete:disabled{opacity:.6;cursor:wait}.record{background:#1a211b;padding:14px;border-radius:8px;margin:9px 0;font-size:13px}
 .foodresults{margin-top:8px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#0c110d;max-height:320px;overflow-y:auto}
 .foodresult{display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:13px;background:transparent;border:0;border-bottom:1px solid #263027;color:var(--text)}
@@ -317,6 +318,13 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
      <div class="progress"><span id="calBar" style="width:0%"></span></div>
      <small class="muted">Kişisel kalori hedefi sonraki geliştirmede ayarlanacak.</small>
     </div>
+   </div>
+   <div class="card nexfit-calendar-card" style="margin-top:16px">
+    <div class="sectionhead"><div><div class="eyebrow">NEXFIT PLANNER</div><h2>Antrenman Takvimi</h2></div><div class="calendar-nav"><button class="btn dark" type="button" onclick="changeWorkoutCalendarMonth(-1)" aria-label="Önceki ay">‹</button><strong id="workoutCalendarMonth"></strong><button class="btn dark" type="button" onclick="changeWorkoutCalendarMonth(1)" aria-label="Sonraki ay">›</button></div></div>
+    <div class="calendar-weekdays"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
+    <div id="workoutCalendarGrid" class="workout-calendar-grid"></div>
+    <div class="calendar-legend"><span><i class="calendar-dot training"></i>Antrenman</span><span><i class="calendar-dot meal"></i>Beslenme kaydı</span></div>
+    <div id="workoutCalendarDetails" class="calendar-details" aria-live="polite"><p class="muted">Bir gün seçerek kayıtlarını görüntüle.</p></div>
    </div>
    <div class="sectionhead"><h2>Son Aktiviteler</h2><button class="btn dark" onclick="tab('history')">Tümünü Gör</button></div>
    <div class="card" id="recent"><p class="muted">Kayıtlar yükleniyor...</p></div>
@@ -962,6 +970,34 @@ async function saveNutrition(){
 }
 
 window.nexfitWorkoutCache=[];
+let workoutCalendarCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let workoutCalendarSelected=localDate();
+function calendarDateKey(date){return date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0")}
+function changeWorkoutCalendarMonth(delta){workoutCalendarCursor=new Date(workoutCalendarCursor.getFullYear(),workoutCalendarCursor.getMonth()+delta,1);renderWorkoutCalendar(window.nexfitWorkoutRows||[],window.nexfitFoodRows||[])}
+function renderWorkoutCalendar(workouts,foods){
+ const grid=$("workoutCalendarGrid"),heading=$("workoutCalendarMonth"),details=$("workoutCalendarDetails");if(!grid||!heading||!details)return;
+ const y=workoutCalendarCursor.getFullYear(),m=workoutCalendarCursor.getMonth();
+ heading.textContent=workoutCalendarCursor.toLocaleDateString("tr-TR",{month:"long",year:"numeric"});
+ const first=new Date(y,m,1),offset=(first.getDay()+6)%7,start=new Date(y,m,1-offset);
+ const workoutMap=new Map(),foodMap=new Map();
+ (workouts||[]).forEach(x=>{const k=String(x.workout_date||"");if(k)workoutMap.set(k,(workoutMap.get(k)||[]).concat(x))});
+ (foods||[]).forEach(x=>{const k=String(x.meal_date||"");if(k)foodMap.set(k,(foodMap.get(k)||[]).concat(x))});
+ grid.replaceChildren();
+ for(let i=0;i<42;i++){
+  const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i),key=calendarDateKey(d),w=workoutMap.get(key)||[],f=foodMap.get(key)||[],b=document.createElement("button");
+  b.type="button";b.className="calendar-day"+(d.getMonth()!==m?" muted-day":"")+(key===localDate()?" today-day":"")+(key===workoutCalendarSelected?" selected":"");
+  b.setAttribute("aria-label",d.toLocaleDateString("tr-TR",{dateStyle:"full"})+", "+w.length+" antrenman, "+f.length+" öğün");
+  const num=document.createElement("span");num.className="date-num";num.textContent=String(d.getDate());const marks=document.createElement("span");marks.className="calendar-markers";
+  if(w.length){const dot=document.createElement("i");dot.className="calendar-dot training";marks.append(dot)}
+  if(f.length){const dot=document.createElement("i");dot.className="calendar-dot meal";marks.append(dot)}
+  b.append(num,marks);b.onclick=()=>{workoutCalendarSelected=key;renderWorkoutCalendar(workouts,foods)};grid.append(b);
+ }
+ const selectedDate=new Date(workoutCalendarSelected+"T12:00:00"),w=workoutMap.get(workoutCalendarSelected)||[],f=foodMap.get(workoutCalendarSelected)||[];
+ details.replaceChildren();const h=document.createElement("h3");h.textContent=selectedDate.toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});details.append(h);
+ if(!w.length&&!f.length){const empty=document.createElement("p");empty.className="calendar-empty";empty.textContent="Bu gün için kayıt bulunmuyor.";details.append(empty);return}
+ w.forEach(x=>{const item=document.createElement("div");item.className="calendar-entry";item.textContent="🏋️ "+(x.exercise_name||"Antrenman");const small=document.createElement("small");small.textContent=(x.sets||0)+" set × "+(x.reps||0)+" tekrar · "+(x.weight||0)+" kg";item.append(small);details.append(item)});
+ f.forEach(x=>{const item=document.createElement("div");item.className="calendar-entry";item.textContent="🥗 "+(x.food_name||"Beslenme kaydı");const small=document.createElement("small");small.textContent=(Number(x.calories)||0).toLocaleString("tr-TR")+" kcal · Protein "+(Number(x.protein)||0)+" g";item.append(small);details.append(item)});
+}
 function renderProgressChart(rows){
  const box=$("progressChart"),select=$("progressExercise");if(!box||!select)return;
  const chosen=select.value;
@@ -1028,7 +1064,7 @@ async function loadData(){
 
  const workouts=w.data||[];
  const foods=n.data||[];
- window.nexfitWorkoutRows=workouts;window.nexfitFoodRows=foods;renderNexfitAI(workouts,foods);
+ window.nexfitWorkoutRows=workouts;window.nexfitFoodRows=foods;renderWorkoutCalendar(workouts,foods);renderNexfitAI(workouts,foods);
  renderProgress(workouts);
  const todays=foods.filter(x=>x.meal_date===today);
  renderNutritionCoach(todays);
