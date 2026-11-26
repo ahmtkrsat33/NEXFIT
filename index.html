@@ -814,8 +814,10 @@ async function openPlanExercise(name){
   let match=id?videoExerciseData.find(x=>String(x.id)===id):null;
   if(!match)match=videoExerciseData.find(x=>[x.name,...(x.aliases||[])].some(v=>normaliseExerciseText(v)===key));
   if(!match){if(status)status.textContent="Bu hareketin videosu katalogda bulunamadı. Hareket kütüphanesinde aratabilirsin.";return}
-  showExercise(match.id);
-  if(status)status.textContent="Hareket anlatımı açıldı.";
+  tab("exercises",document.querySelectorAll(".navbtn")[5]);
+  await new Promise(resolve=>requestAnimationFrame(resolve));
+  await showExercise(match.id);
+  if(status)status.textContent="Hareket anlatımı açıldı. Hareket kütüphanesinde görüntüleniyor.";
  }catch(error){if(status)status.textContent="Hareket anlatımı yüklenemedi. Hareketler sekmesinden tekrar deneyebilirsin.";console.warn("Plan exercise detail error",error)}
 }
 function renderPlan(p){const d=p.plan_data||{},box=$('activePlanPreview');box.replaceChildren();(d.schedule||[]).forEach(function(day){const card=document.createElement('div');card.className='plan-day';const h=document.createElement('h3');h.textContent=day.title;card.append(h);(day.exercises||[]).forEach(function(ex){const row=document.createElement('div');row.className='plan-exercise';const name=document.createElement('span');name.textContent=ex.name;const dose=document.createElement('span');dose.textContent=ex.prescription;row.append(name,dose);const detail=document.createElement('button');detail.type='button';detail.className='btn dark plan-exercise-detail-btn';detail.textContent='Nasıl yapılır?';detail.onclick=function(){openPlanExercise(ex.name)};row.append(detail);card.append(row)});box.append(card)});$('activePlanTitle').textContent=p.title;$('activePlanMeta').textContent='Haftada '+p.days_per_week+' gün · '+new Date(p.created_at).toLocaleDateString('tr-TR')+' tarihinde oluşturuldu';let status=$('planExerciseStatus');if(!status){status=document.createElement('p');status.id='planExerciseStatus';status.className='muted';box.parentElement.insertBefore(status,box.nextSibling)}status.textContent='Her hareketin yanındaki “Nasıl yapılır?” düğmesine dokun: ekipman, adım adım anlatım, teknik ipuçları ve varsa demo videosu açılır.'}
