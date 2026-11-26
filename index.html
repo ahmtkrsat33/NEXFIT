@@ -306,6 +306,11 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
    </div>
   </section>
 
+  <section id="programs" class="page hidden">
+   <div class="card program-hero"><div class="eyebrow">NEXFIT COACHING SYSTEM</div><h1>Hedefine uygun <span class="green">programını oluştur.</span></h1><p class="muted">Hedefini, seviyeni ve haftalık gün sayını seç. Sana gün gün egzersiz, set ve tekrar planı hazırlayalım.</p></div>
+   <div class="grid twocol" style="margin-top:16px;align-items:start"><div class="card"><h2>Program oluşturucu</h2><label>Hedefin</label><select id="planGoal"><option value="muscle">Kas kütlesi kazanmak</option><option value="fat">Yağ kaybı ve kondisyon</option><option value="strength">Güç kazanmak</option><option value="fitness">Genel fitness</option></select><label>Seviyen</label><select id="planLevel"><option value="beginner">Başlangıç</option><option value="intermediate">Orta</option><option value="advanced">İleri</option></select><label>Haftada kaç gün?</label><div class="choice-row" id="planDays"><button class="choice active" data-days="3" onclick="choosePlanDays(3)">3 GÜN</button><button class="choice" data-days="4" onclick="choosePlanDays(4)">4 GÜN</button><button class="choice" data-days="5" onclick="choosePlanDays(5)">5 GÜN</button><button class="choice" data-days="6" onclick="choosePlanDays(6)">6 GÜN</button></div><button class="btn full" onclick="generateTrainingPlan()">✦ PROGRAMIMI OLUŞTUR</button><p id="planMessage" class="foodhint">Programın Supabase hesabında saklanır.</p></div><div class="card"><div class="eyebrow">AKTİF PROGRAM</div><h2 id="activePlanTitle">Henüz programın yok</h2><p id="activePlanMeta" class="muted">Programın oluşturulduğunda burada görünecek.</p><div id="activePlanPreview"></div></div></div>
+   <div class="sectionhead"><h2>Program geçmişim</h2></div><div id="planHistory" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))"></div>
+  </section>
   <section id="nutrition" class="page hidden">
    <div class="card">
     <div class="eyebrow">NUTRITION CENTER</div>
