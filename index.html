@@ -1120,7 +1120,7 @@ async function showExercise(id){
  const title=document.createElement("h2");title.textContent=nexfitTurkishExerciseName(e.name);
  const video=document.createElement("video");video.className="exercise-video-frame";video.controls=true;video.playsInline=true;video.preload="metadata";video.setAttribute("controlsList","nodownload");video.poster=e.thumbnails?.male||e.thumbnails?.female||createNexfitExerciseCover(e);
  const controls=document.createElement("div");controls.className="exercise-video-controls";const male=document.createElement("button"),female=document.createElement("button");male.textContent="Erkek demo";female.textContent="Kadın demo";
- const videoStatus=document.createElement("p");videoStatus.className="muted";videoStatus.setAttribute("role","status");videoStatus.textContent="Video bağlantısı hazırlanıyor…";
+ const videoStatus=document.createElement("p");videoStatus.className="muted";videoStatus.setAttribute("role","status");videoStatus.setAttribute("aria-live","polite");videoStatus.textContent="Video bağlantısı hazırlanıyor…";const playButton=document.createElement("button");playButton.type="button";playButton.className="btn";playButton.textContent="▶ Videoyu oynat";playButton.style.margin="8px 0";playButton.onclick=async()=>{try{if(!video.src){videoStatus.textContent="Önce bir demo videosu seç.";return}await video.play();videoStatus.textContent="Video oynatılıyor."}catch(error){videoStatus.textContent="Tarayıcı videoyu başlatamadı. Bağlantıyı kontrol et veya videoyu yeni sekmede aç.";console.warn("NEXFIT video playback failed",error)}};
  const directLink=document.createElement("a");directLink.textContent="Videoyu yeni sekmede aç";directLink.target="_blank";directLink.rel="noopener noreferrer";directLink.style.cssText="display:none;color:var(--green);font-weight:700";
  let activeKind="",triedFallback=false;
  const setVideo=(kind,automaticFallback=false)=>{
@@ -1131,6 +1131,9 @@ async function showExercise(id){
  video.addEventListener("loadedmetadata",()=>{videoStatus.textContent="Video hazır · Oynat düğmesine bas.";});
  video.addEventListener("canplay",()=>{videoStatus.textContent="Video oynatılmaya hazır.";});
  video.addEventListener("waiting",()=>{videoStatus.textContent="Video yükleniyor… bağlantı hızına göre biraz sürebilir.";});
+ video.addEventListener("stalled",()=>{videoStatus.textContent="Video aktarımı durakladı. Bağlantı yavaşsa bekle veya yeniden dene.";});
+ video.addEventListener("playing",()=>{videoStatus.textContent="Video oynatılıyor.";});
+ video.addEventListener("pause",()=>{if(!video.ended&&video.currentTime>0)videoStatus.textContent="Video duraklatıldı.";});
  video.addEventListener("error",()=>{
   const code=video.error?.code;
   if(!triedFallback&&e.videos?.[activeKind==="male"?"female":"male"]){
@@ -1146,7 +1149,7 @@ async function showExercise(id){
  const coaching=document.createElement("div");coaching.className="exercise-coaching-notes";
  const makeList=(heading,items)=>{const wrap=document.createElement("section");const h=document.createElement("h3");h.textContent=heading;const ul=document.createElement("ul");(items||[]).forEach(value=>{const li=document.createElement("li");li.textContent=value;ul.append(li)});wrap.append(h,ul);coaching.append(wrap);return ul};
  const stepsList=makeList("Nasıl yapılır?",e.steps||[]);const cuesList=makeList("Teknik kontrol noktaları",e.formCues||[]);const mistakesList=makeList("Sık yapılan hatalar",e.commonMistakes||[]);const breath=document.createElement("p");breath.textContent=e.breathing?"Nefes: "+e.breathing:"";if(e.breathing)coaching.append(breath);const translationStatus=document.createElement("small");translationStatus.className="muted";translationStatus.textContent="Türkçe içerik hazırlanıyor…";coaching.prepend(translationStatus);
- const actions=document.createElement("div");actions.className="exercise-actions";const add=document.createElement("button");add.className="btn";add.textContent="＋ Antrenmana ekle";add.onclick=()=>{$("exercise").value=e.name;tab("workout",document.querySelectorAll(".navbtn")[1]);say("Hareket antrenman formuna eklendi. Set, tekrar ve ağırlığı girip kaydedebilirsin.");window.scrollTo({top:0,behavior:"smooth"})};const close=document.createElement("button");close.className="btn dark";close.textContent="Kapat";close.onclick=()=>box.replaceChildren();actions.append(add,close);box.append(title,video,controls,videoStatus,directLink,meta,description,coaching,actions);
+ const actions=document.createElement("div");actions.className="exercise-actions";const add=document.createElement("button");add.className="btn";add.textContent="＋ Antrenmana ekle";add.onclick=()=>{$("exercise").value=e.name;tab("workout",document.querySelectorAll(".navbtn")[1]);say("Hareket antrenman formuna eklendi. Set, tekrar ve ağırlığı girip kaydedebilirsin.");window.scrollTo({top:0,behavior:"smooth"})};const close=document.createElement("button");close.className="btn dark";close.textContent="Kapat";close.onclick=()=>box.replaceChildren();actions.append(add,close);box.append(title,video,controls,playButton,videoStatus,directLink,meta,description,coaching,actions);
  nexfitTranslateExerciseDetail(e,{title,description,steps:stepsList,cues:cuesList,mistakes:mistakesList,breath,status:translationStatus});
  if(!e.videos?.male&&!e.videos?.female){const note=document.createElement("p");note.className="muted";note.textContent="Bu hareket için şu anda video bağlantısı bulunmuyor.";box.insertBefore(note,meta)}box.scrollIntoView({behavior:"smooth",block:"start"});
 }
