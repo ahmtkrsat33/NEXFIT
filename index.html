@@ -125,6 +125,65 @@ section.page{min-width:0}
 .exercise-count{color:var(--muted);font-size:12px;margin:12px 0}
 @media(max-width:600px){.exercise-tools{grid-template-columns:1fr}.exercise-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.exercise-visual{height:145px}.exercise-copy{padding:10px}.exercise-copy strong{font-size:12px}}
 
+
+/* NEXFIT PREMIUM UI REFRESH */
+:root{--green:#baff35;--bg:#070907;--panel:#101611;--panel2:#171f18;--line:#29372b;--muted:#98a398}
+body{background:radial-gradient(ellipse at 75% -15%,rgba(125,190,45,.12),transparent 38%),var(--bg);font-family:Inter,"Segoe UI",Arial,sans-serif;letter-spacing:.05px}
+button,.btn,input,select{transition:all .2s ease}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.card{background:linear-gradient(145deg,rgba(22,31,23,.96),rgba(13,18,14,.98));border:1px solid rgba(154,190,143,.13);border-radius:18px;box-shadow:0 12px 34px rgba(0,0,0,.18)}
+.main{padding-top:34px}
+.topbar{padding-bottom:18px;border-bottom:1px solid rgba(154,190,143,.1)}
+.logo{ text-shadow:0 0 24px rgba(186,255,53,.16)}
+.pill{background:rgba(186,255,53,.055);border-color:rgba(186,255,53,.22);color:#d8e8d2}
+.btn{background:linear-gradient(135deg,#d0ff72,#a9ed25);color:#101609;border:1px solid rgba(220,255,170,.45);border-radius:11px;padding:13px 19px;font-weight:850;letter-spacing:.25px;box-shadow:0 5px 18px rgba(174,240,49,.13)}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 8px 24px rgba(174,240,49,.2)}
+.btn:active{transform:translateY(0) scale(.985)}
+.btn.dark{background:linear-gradient(145deg,#202a21,#151c16);color:#e4ebe1;border:1px solid #354536;box-shadow:none}
+.btn.dark:hover{border-color:rgba(186,255,53,.55);color:var(--green);background:#202b20}
+input,select{background:linear-gradient(145deg,#0a100b,#0d130e);border:1px solid #344235;border-radius:11px;padding:14px 15px;color:#f4f7f2;box-shadow:inset 0 1px 3px rgba(0,0,0,.18)}
+input::placeholder{color:#687568}
+input:hover,select:hover{border-color:#53694f}
+input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(186,255,53,.09);outline:0}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#baff35 50%),linear-gradient(135deg,#baff35 50%,transparent 50%);background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:34px}
+label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:uppercase;color:#b7c5b5}
+.sidebar{background:linear-gradient(180deg,#0d130e,#090d0a);border-right:1px solid rgba(154,190,143,.13)}
+.navlabel{font-weight:800;letter-spacing:2.2px}
+.navbtn{position:relative;border:1px solid transparent;border-radius:11px;padding:13px 14px;color:#9eaa9d;font-weight:650;letter-spacing:.1px}
+.navbtn:hover{background:rgba(186,255,53,.055);color:#e8f2e4;border-color:rgba(186,255,53,.12)}
+.navbtn.active{background:linear-gradient(100deg,rgba(186,255,53,.14),rgba(186,255,53,.035));border-color:rgba(186,255,53,.2);color:var(--green);box-shadow:inset 3px 0 0 var(--green),0 5px 18px rgba(0,0,0,.12)}
+.tabs{background:#090e0a;border:1px solid #263226;border-radius:12px;padding:5px;gap:5px}
+.tabs button{border-radius:9px;font-size:12px;letter-spacing:.5px}
+.tabs button:not(.active):hover{background:#172019;color:#eaf3e7}
+.tabs button.active{background:linear-gradient(135deg,#d0ff72,#a9ed25);box-shadow:0 3px 12px rgba(186,255,53,.15)}
+.statnum{letter-spacing:-1px}
+.stats .card{position:relative;overflow:hidden}
+.stats .card:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;right:-40px;top:-42px;background:rgba(186,255,53,.045);filter:blur(2px);pointer-events:none}
+.macro,.record,.day{background:linear-gradient(145deg,#1b251c,#141b15);border:1px solid rgba(154,190,143,.1);border-radius:12px}
+.day.done{background:rgba(186,255,53,.09);border-color:rgba(186,255,53,.45)}
+.foodresults{border:1px solid #344235;border-radius:13px;box-shadow:0 12px 28px rgba(0,0,0,.2)}
+.foodresult{padding:15px 14px}
+.foodresult:hover{background:rgba(186,255,53,.07)}
+.exercise-card{background:linear-gradient(145deg,#151e16,#0e140f);border:1px solid rgba(154,190,143,.14);border-radius:15px;box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.exercise-card:hover{border-color:rgba(186,255,53,.65);box-shadow:0 12px 28px rgba(0,0,0,.3),0 0 0 1px rgba(186,255,53,.08);transform:translateY(-3px)}
+.exercise-visual{background:radial-gradient(ellipse at 50% 45%,#263526,#111812 72%)}
+.exercise-detail{background:linear-gradient(145deg,#141e15,#0d130e);border:1px solid rgba(186,255,53,.24);border-radius:16px;box-shadow:0 15px 35px rgba(0,0,0,.24)}
+.exercise-chip{background:rgba(186,255,53,.1);border:1px solid rgba(186,255,53,.16);font-weight:750}
+.sectionhead{align-items:center}
+#message{padding:10px 13px;border-radius:10px;background:rgba(186,255,53,.07);border:1px solid rgba(186,255,53,.16)}
+.authbox .card{box-shadow:0 25px 70px rgba(0,0,0,.4);border-color:rgba(186,255,53,.17)}
+@media(max-width:600px){
+ .sidebar{background:#0b100c}
+ .sidebar .logo{display:inline-block;margin-bottom:10px}
+ .sidebar{overflow:hidden}
+ .sidebar .navbtn{border-radius:9px;margin:3px 2px}
+ .navbtn.active{box-shadow:inset 0 -2px 0 var(--green)}
+ .main{padding-top:18px}
+ .card{border-radius:15px}
+ .btn{padding:12px 14px}
+ .exercise-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
 </style>
 </head>
 <body>
