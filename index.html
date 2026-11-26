@@ -1131,13 +1131,13 @@ function renderDailyGoals(workouts,foods){
  const calories=tf.reduce((a,x)=>a+(Number(x.calories)||0),0),protein=tf.reduce((a,x)=>a+(Number(x.protein)||0),0);
  const wd=wellnessData(),p=wd.profile||{},d=wd.days&&wd.days[today]||{};
  const targets={calories:Number(p.calories)||2200,protein:Number(p.protein)||120,water:Number(p.water)||2500};
- const imported=d.appleHealth&&d.appleHealth.daily&&d.appleHealth.daily[today]||{};
+ const imported=wd.appleHealth&&wd.appleHealth.daily&&wd.appleHealth.daily[today]||{};
  const goals=[
   {name:"Antrenman",sub:"Bugün en az 1 antrenman kaydı",value:tw.length+" kayıt",done:tw.length>0},
   {name:"Protein",sub:"Günlük protein hedefi",value:Math.round(protein)+" / "+Math.round(targets.protein)+" g",done:protein>=targets.protein},
   {name:"Su tüketimi",sub:"Günlük su hedefi",value:(Number(d.water)||0)+" / "+targets.water+" ml",done:(Number(d.water)||0)>=targets.water},
   {name:"Adım",sub:"Günlük 8.000 adım hedefi",value:Math.round(imported.steps||0).toLocaleString("tr-TR")+" / 8.000",done:(Number(imported.steps)||0)>=8000},
-  {name:"Uyku",sub:"Önerilen minimum 7 saat",value:(Number(d.sleep)||0)+" / 7 saat",done:(Number(d.sleep)||0)>=7},
+  {name:"Uyku",sub:"Önerilen minimum 7 saat",value:(Number(imported.sleepMinutes?imported.sleepMinutes/60:d.sleep)||0)+" / 7 saat",done:(Number(imported.sleepMinutes?imported.sleepMinutes/60:d.sleep)||0)>=7},
   {name:"Kalori dengesi",sub:"Hedefin yüzde 90-110 aralığı",value:Math.round(calories)+" / "+Math.round(targets.calories)+" kcal",done:calories>=targets.calories*.9&&calories<=targets.calories*1.1}
  ];
  const completed=goals.filter(x=>x.done).length;percent.textContent=Math.round(completed/goals.length*100)+"%";bar.style.width=(completed/goals.length*100)+"%";list.replaceChildren();
