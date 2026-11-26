@@ -6,7 +6,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#080a09">
 <title>NEXFIT | Fitness Performance</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">function wellnessKey(){return "nexfit_wellness_"+(user?user.id:"guest")}
+function wellnessData(){try{return JSON.parse(localStorage.getItem(wellnessKey())||"{}")}catch(e){return {}}}
+function putWellness(d){localStorage.setItem(wellnessKey(),JSON.stringify(d))}
+function loadWellness(){const d=wellnessData(),p=d.profile||{};if(p.age)$("wellAge").value=p.age;if(p.height)$("wellHeight").value=p.height;if(p.weight)$("wellWeight").value=p.weight;if(p.sex)$("wellSex").value=p.sex;if(p.goal)$("wellGoal").value=p.goal;if(p.activity)$("wellActivity").value=p.activity;if(p.days)$("wellDays").value=p.days;if(p.calories){$("wellCalories").textContent=Math.round(p.calories).toLocaleString("tr-TR");$("wellProtein").textContent=Math.round(p.protein);$("wellCarbs").textContent=Math.round(p.carbs);$("wellFat").textContent=Math.round(p.fat);$("wellBmi").textContent="BMR "+Math.round(p.bmr)+" kcal · TDEE "+Math.round(p.tdee)+" kcal · BMI "+p.bmi.toFixed(1)}const t=d.days&&d.days[today]?d.days[today]:{};const water=t.water||0;$("waterTotal").textContent=water.toLocaleString("tr-TR")+" ml";$("waterBar").style.width=Math.min(100,water/(p.water||2500)*100)+"%";$("waterGoalText").textContent="Günlük hedef: "+(p.water||2500)+" ml";$("sleepDisplay").textContent=t.sleep?t.sleep+" saat":"Henüz kayıt yok";$("sleepHours").value=t.sleep||"";renderMeasurements(d.measurements||[])}
+saveWellProfile_PLACEHOLDER
+function dayWellness(){const d=wellnessData();d.days=d.days||{};d.days[today]=d.days[today]||{};return d}
+function addWater(ml){const d=dayWellness();d.days[today].water=(d.days[today].water||0)+ml;putWellness(d);loadWellness()}
+function resetWater(){const d=dayWellness();d.days[today].water=0;putWellness(d);loadWellness()}
+function saveSleep(){const h=Number($("sleepHours").value);if(!Number.isFinite(h)||h<=0||h>24){say("Uyku süresini 0 ile 24 saat arasında gir.");return}const d=dayWellness();d.days[today].sleep=h;putWellness(d);loadWellness();say("Uyku kaydedildi.")}
+function saveMeasurement(){const x={date:today,weight:Number($("measureWeight").value)||null,waist:Number($("measureWaist").value)||null,chest:Number($("measureChest").value)||null,hip:Number($("measureHip").value)||null};if(!x.weight&&!x.waist&&!x.chest&&!x.hip){say("En az bir ölçüm gir.");return}const d=wellnessData();d.measurements=d.measurements||[];d.measurements.unshift(x);d.measurements=d.measurements.slice(0,100);putWellness(d);renderMeasurements(d.measurements);say("Ölçüm kaydedildi.")}
+function renderMeasurements(rows){const box=$("measurementList");if(!box)return;box.replaceChildren();if(!rows.length){box.textContent="Henüz ölçüm kaydı yok.";return}rows.forEach(x=>{const el=document.createElement("div");el.className="record";el.textContent=x.date+" · "+[x.weight&&("Kilo "+x.weight+" kg"),x.waist&&("Bel "+x.waist+" cm"),x.chest&&("Göğüs "+x.chest+" cm"),x.hip&&("Kalça "+x.hip+" cm")].filter(Boolean).join(" · ");box.append(el)})}
+</script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root{--bg:#080a09;--panel:#111612;--panel2:#171e18;--line:#29332a;--green:#b7ff27;--text:#f4f7f2;--muted:#89948b}
@@ -225,6 +236,7 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
   <button class="navbtn" onclick="tab('nutrition',this)">◉　Beslenme</button>
   <button class="navbtn" onclick="tab('history',this)">▥　Kayıtlarım</button>
   <button class="navbtn" onclick="tab('exercises',this)">💪　Hareket Kütüphanesi</button>
+  <button class="navbtn" onclick="tab('wellness',this)">✦　Vücut & Yaşam Takibi</button>
   <div class="navlabel">HESAP</div>
   <button class="navbtn" onclick="logout()">↪　Çıkış Yap</button>
   <div class="sidebottom">NEXFIT PERFORMANCE<br>BUILD YOUR BEST SELF.</div>
@@ -356,6 +368,25 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
     <div class="card"><h2>🥗 Beslenme</h2><div id="nutritionList"></div></div>
    </div>
   </section>
+
+  <section id="wellness" class="page hidden">
+   <div class="card"><div class="eyebrow">PERSONAL HEALTH & LONGEVITY</div><h1>Vücut & <span class="green">Yaşam Takibi</span></h1><p class="muted">Hedefini belirle; kalori, makro, su, uyku ve vücut gelişimini tek yerden takip et.</p></div>
+   <div class="grid twocol" style="margin-top:16px">
+    <div class="card"><h2>✦ Kişisel Profil & Hedef</h2><div class="formgrid">
+     <div><label>Yaş</label><input id="wellAge" type="number" min="15" max="100" placeholder="28"></div><div><label>Cinsiyet</label><select id="wellSex"><option value="male">Erkek</option><option value="female">Kadın</option></select></div>
+     <div><label>Boy (cm)</label><input id="wellHeight" type="number" min="100" max="230" placeholder="180"></div><div><label>Kilo (kg)</label><input id="wellWeight" type="number" min="30" max="300" step=".1" placeholder="80"></div></div>
+     <label>Hedefin</label><select id="wellGoal"><option value="muscle">Kas kazanımı</option><option value="fat">Yağ kaybı</option><option value="maintain">Kiloyu koruma</option><option value="fitness">Genel kondisyon</option><option value="yoga">Yoga & mobilite</option><option value="pilates">Pilates</option><option value="meditation">Meditasyon</option></select>
+     <label>Aktivite düzeyi</label><select id="wellActivity"><option value="1.2">Hareketsiz</option><option value="1.375">Hafif aktif (1-3 gün)</option><option value="1.55" selected>Orta aktif (3-5 gün)</option><option value="1.725">Çok aktif (6-7 gün)</option><option value="1.9">Yoğun fiziksel aktivite</option></select>
+     <label>Haftalık antrenman hedefi</label><select id="wellDays"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select><button class="btn" style="margin-top:16px" onclick="saveWellProfile()">HEDEFİ HESAPLA & KAYDET</button><p class="muted" id="wellProfileMsg">Bilgilerini girerek tahmini günlük enerji ihtiyacını hesapla.</p>
+    </div>
+    <div class="card"><h2>Günlük hedeflerin</h2><div class="grid stats" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="macro"><small>Günlük kalori</small><b id="wellCalories">—</b><small>kcal / gün</small></div><div class="macro"><small>Protein</small><b id="wellProtein">—</b><small>gram / gün</small></div><div class="macro"><small>Karbonhidrat</small><b id="wellCarbs">—</b><small>gram / gün</small></div><div class="macro"><small>Yağ</small><b id="wellFat">—</b><small>gram / gün</small></div></div><p class="muted" id="wellBmi">BMR, TDEE ve BMI tahminleri burada görünür.</p><p class="sourcehint">Değerler genel tahmindir; tıbbi öneri değildir.</p></div>
+   </div>
+   <div class="grid twocol" style="margin-top:16px">
+    <div class="card"><h2>💧 Su takibi</h2><div class="statnum green" id="waterTotal">0 ml</div><div class="progress"><span id="waterBar" style="width:0%"></span></div><p class="muted" id="waterGoalText">Günlük hedef: 2500 ml</p><div class="exercise-actions"><button class="btn" onclick="addWater(250)">＋ 250 ml</button><button class="btn dark" onclick="addWater(500)">＋ 500 ml</button><button class="btn dark" onclick="addWater(750)">＋ 750 ml</button><button class="btn dark" onclick="resetWater()">Sıfırla</button></div></div>
+    <div class="card"><h2>🌙 Uyku takibi</h2><label>Geçen gece kaç saat uyudun?</label><div class="brandrow"><input id="sleepHours" type="number" min="0" max="24" step=".5" placeholder="7.5"><button class="btn" onclick="saveSleep()">KAYDET</button></div><div class="statnum green" id="sleepDisplay">Henüz kayıt yok</div></div>
+   </div>
+   <div class="card" style="margin-top:16px"><h2>📏 Vücut ölçümleri</h2><div class="formgrid"><div><label>Kilo (kg)</label><input id="measureWeight" type="number" step=".1" placeholder="80"></div><div><label>Bel (cm)</label><input id="measureWaist" type="number" step=".1" placeholder="85"></div><div><label>Göğüs (cm)</label><input id="measureChest" type="number" step=".1" placeholder="100"></div><div><label>Kalça (cm)</label><input id="measureHip" type="number" step=".1" placeholder="95"></div></div><button class="btn" style="margin-top:14px" onclick="saveMeasurement()">ÖLÇÜMÜ KAYDET</button><div id="measurementList" style="margin-top:14px"></div></div>
+  </section>
   <p id="message"></p>
  </main>
 </div>
@@ -425,13 +456,14 @@ async function logout(){
  setMode("login");
 }
 function tab(id,btn){
- ["dashboard","workout","nutrition","history","exercises"].forEach(x=>$(x).classList.toggle("hidden",x!==id));
+ ["dashboard","workout","nutrition","history","exercises","wellness"].forEach(x=>$(x).classList.toggle("hidden",x!==id));
  document.querySelectorAll(".navbtn").forEach(x=>x.classList.remove("active"));
  if(btn)btn.classList.add("active");
- $("welcome").textContent={dashboard:"Genel Bakış",workout:"Antrenman Merkezi",nutrition:"Beslenme Merkezi",history:"Kayıtlarım",exercises:"Hareket Kütüphanesi"}[id];
+ $("welcome").textContent={dashboard:"Genel Bakış",workout:"Antrenman Merkezi",nutrition:"Beslenme Merkezi",history:"Kayıtlarım",exercises:"Hareket Kütüphanesi",wellness:"Vücut & Yaşam Takibi"}[id];
  if(id==="dashboard"||id==="history")loadData();
  if(id==="nutrition")loadFoodCatalog();
  if(id==="exercises")loadExercises();
+ if(id==="wellness")loadWellness();
 }
 function addRecord(parent,title,desc){
  const d=document.createElement("div");d.className="record";
