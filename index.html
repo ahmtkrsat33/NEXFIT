@@ -6,7 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#080a09">
 <title>NEXFIT | Fitness Performance</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">function wellnessKey(){return "nexfit_wellness_"+(user?user.id:"guest")}
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>function wellnessKey(){return "nexfit_wellness_"+(user?user.id:"guest")}
 function wellnessData(){try{return JSON.parse(localStorage.getItem(wellnessKey())||"{}")}catch(e){return {}}}
 function putWellness(d){localStorage.setItem(wellnessKey(),JSON.stringify(d))}
 function loadWellness(){const d=wellnessData(),p=d.profile||{};if(p.age)$("wellAge").value=p.age;if(p.height)$("wellHeight").value=p.height;if(p.weight)$("wellWeight").value=p.weight;if(p.sex)$("wellSex").value=p.sex;if(p.goal)$("wellGoal").value=p.goal;if(p.activity)$("wellActivity").value=p.activity;if(p.days)$("wellDays").value=p.days;if(p.calories){$("wellCalories").textContent=Math.round(p.calories).toLocaleString("tr-TR");$("wellProtein").textContent=Math.round(p.protein);$("wellCarbs").textContent=Math.round(p.carbs);$("wellFat").textContent=Math.round(p.fat);$("wellBmi").textContent="BMR "+Math.round(p.bmr)+" kcal · TDEE "+Math.round(p.tdee)+" kcal · BMI "+p.bmi.toFixed(1)}const t=d.days&&d.days[today]?d.days[today]:{};const water=t.water||0;$("waterTotal").textContent=water.toLocaleString("tr-TR")+" ml";$("waterBar").style.width=Math.min(100,water/(p.water||2500)*100)+"%";$("waterGoalText").textContent="Günlük hedef: "+(p.water||2500)+" ml";$("sleepDisplay").textContent=t.sleep?t.sleep+" saat":"Henüz kayıt yok";$("sleepHours").value=t.sleep||"";renderMeasurements(d.measurements||[])}
