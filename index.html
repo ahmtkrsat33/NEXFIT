@@ -340,6 +340,17 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
 }
 
 
+/* READY-MADE TRAINING PROGRAMS */
+.preset-programs{margin-top:16px}
+.preset-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+.preset-card{display:flex;flex-direction:column;align-items:flex-start;padding:17px;border:1px solid #304033;border-radius:13px;background:linear-gradient(150deg,#172119,#101511);min-width:0}
+.preset-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#24351f;color:var(--green);font-size:22px}
+.preset-card h3{margin:13px 0 6px;font-size:16px}
+.preset-card p{color:var(--muted);font-size:12px;line-height:1.55;margin:0 0 12px;min-height:38px}
+.preset-card small{font-size:10px;color:#a9b6a8;margin-top:auto}
+.preset-card .btn{font-size:10px;padding:11px 8px;line-height:1.4}
+@media(max-width:1000px){.preset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.preset-grid{grid-template-columns:1fr}.preset-card p{min-height:0}}
 /* NEXFIT PROGRAM BUILDER */
 .program-hero{background:radial-gradient(ellipse at 85% 10%,rgba(186,255,53,.16),transparent 42%),linear-gradient(125deg,#172319,#0d130e);padding:30px}.choice-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0 18px}.choice{border:1px solid #344235;background:#111812;color:#aebbac;border-radius:10px;padding:13px 4px;font-weight:800;font-size:11px}.choice.active{background:linear-gradient(135deg,#d0ff72,#a9ed25);color:#101609}.plan-day{padding:15px;border:1px solid rgba(186,255,53,.16);background:linear-gradient(145deg,#18221a,#101611);border-radius:13px;margin:10px 0}.plan-day h3{color:var(--green)}.plan-exercise{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.055);font-size:12px}.plan-exercise span:last-child{white-space:nowrap;color:#b9c9b4}.plan-history-card{padding:16px;border:1px solid var(--line);border-radius:13px;background:#111812}@media(max-width:600px){.choice-row{grid-template-columns:repeat(2,1fr)}}
 
@@ -492,6 +503,16 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
 
   <section id="programs" class="page hidden">
    <div class="card program-hero"><div class="eyebrow">NEXFIT COACHING SYSTEM</div><h1>Hedefine uygun <span class="green">programını oluştur.</span></h1><p class="muted">Hedefini, seviyeni ve haftalık gün sayını seç. Sana gün gün egzersiz, set ve tekrar planı hazırlayalım.</p></div>
+   <div class="card preset-programs">
+    <div class="eyebrow">HAZIR ANTRENMAN ŞABLONLARI</div><h2>Hazır programını seç</h2>
+    <p class="muted">Bölgesel veya tüm vücut çalış. Seçtiğin program hesabına kaydedilir ve aktif programın olur.</p>
+    <div class="preset-grid">
+     <article class="preset-card"><span class="preset-icon">↟</span><h3>Üst Vücut</h3><p>Göğüs, sırt, omuz, biceps ve triceps.</p><small>Haftada 2 gün</small><button class="btn full" onclick="saveTrainingPreset('upper')">ÜST VÜCUT PROGRAMINI EKLE</button></article>
+     <article class="preset-card"><span class="preset-icon">↡</span><h3>Alt Vücut</h3><p>Ön bacak, arka bacak, kalça ve baldır.</p><small>Haftada 2 gün</small><button class="btn full" onclick="saveTrainingPreset('lower')">ALT VÜCUT PROGRAMINI EKLE</button></article>
+     <article class="preset-card"><span class="preset-icon">◉</span><h3>Tüm Vücut</h3><p>Her antrenmanda temel kas gruplarını çalıştır.</p><small>Haftada 3 gün</small><button class="btn full" onclick="saveTrainingPreset('full')">TÜM VÜCUT PROGRAMINI EKLE</button></article>
+     <article class="preset-card"><span class="preset-icon">⟳</span><h3>Push / Pull / Legs</h3><p>İtiş, çekiş ve bacak günleriyle bölgesel plan.</p><small>Haftada 6 gün · Orta/ileri</small><button class="btn full" onclick="saveTrainingPreset('ppl')">PPL PROGRAMINI EKLE</button></article>
+    </div><p class="foodhint" id="presetMessage">Seçtiğin program aktif olur; eski programın geçmişte korunur.</p>
+   </div>
    <div class="grid twocol" style="margin-top:16px;align-items:start"><div class="card"><h2>Program oluşturucu</h2><label>Hedefin</label><select id="planGoal"><option value="muscle">Kas kütlesi kazanmak</option><option value="fat">Yağ kaybı ve kondisyon</option><option value="strength">Güç kazanmak</option><option value="fitness">Genel fitness</option></select><label>Seviyen</label><select id="planLevel"><option value="beginner">Başlangıç</option><option value="intermediate">Orta</option><option value="advanced">İleri</option></select><label>Haftada kaç gün?</label><div class="choice-row" id="planDays"><button class="choice active" data-days="3" onclick="choosePlanDays(3)">3 GÜN</button><button class="choice" data-days="4" onclick="choosePlanDays(4)">4 GÜN</button><button class="choice" data-days="5" onclick="choosePlanDays(5)">5 GÜN</button><button class="choice" data-days="6" onclick="choosePlanDays(6)">6 GÜN</button></div><button class="btn full" onclick="generateTrainingPlan()">✦ PROGRAMIMI OLUŞTUR</button><p id="planMessage" class="foodhint">Programın Supabase hesabında saklanır.</p></div><div class="card"><div class="eyebrow">AKTİF PROGRAM</div><h2 id="activePlanTitle">Henüz programın yok</h2><p id="activePlanMeta" class="muted">Programın oluşturulduğunda burada görünecek.</p><div id="activePlanPreview"></div></div></div>
    <div class="sectionhead"><h2>Program geçmişim</h2></div><div id="planHistory" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))"></div>
   </section>
