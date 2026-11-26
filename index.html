@@ -830,7 +830,7 @@ function filterExercises(){
  const run=++exerciseFilterRun,q=($("exerciseSearch").value||"").toLocaleLowerCase("tr-TR").trim(),cat=$("exerciseCategory").value,eq=$("exerciseEquipment").value;
  visibleExercises=exerciseData.filter(e=>{const hay=[e.name_en,e.body_part,e.equipment,...(e.primary_muscles||[]),...(e.secondary_muscles||[])].join(" ").toLocaleLowerCase("tr-TR");return (!q||hay.includes(q))&&(!cat||exerciseRegion(e)===cat)&&(!eq||exerciseEquipGroup(e)===eq)});
  $("exerciseCount").textContent=visibleExercises.length+" / "+exerciseData.length+" hareket gösteriliyor";
- const grid=$("exerciseGrid");grid.replaceChildren();const shown=visibleExercises.slice(0,120),titles=[];
+ const grid=$("exerciseGrid");grid.replaceChildren();const shown=visibleExercises.slice(0,120),titles=[],metaRows=[];
  shown.forEach(e=>{
   const card=document.createElement("article");card.className="exercise-card";card.onclick=()=>showExercise(e.id);
   const visual=document.createElement("div");visual.className="exercise-visual";
@@ -841,10 +841,10 @@ function filterExercises(){
   const title=document.createElement("strong");title.textContent=trExercise(e.name_en);
   const meta=document.createElement("small");meta.textContent=trExercise(e.body_part)+" · "+trExercise(e.equipment||"bodyweight");
   const chip=document.createElement("span");chip.className="exercise-chip";chip.textContent=trExercise(e.difficulty);
-  copy.append(title,meta,chip);card.append(visual,copy);grid.append(card);titles.push({e,title});
+  copy.append(title,meta,chip);card.append(visual,copy);grid.append(card);titles.push({e,title});metaRows.push({e,meta,chip});
  });
  if(visibleExercises.length>120){const note=document.createElement("p");note.className="muted";note.textContent="İlk 120 sonuç gösteriliyor. Daha fazla daraltmak için arama veya filtre kullan.";grid.append(note)}
- (async()=>{const translated=await translateTexts(titles.map(x=>x.e.name_en));if(run!==exerciseFilterRun)return;titles.forEach((x,i)=>{if(grid.contains(x.title)&&translated[i])x.title.textContent=translated[i]})})();
+ (async()=>{const translated=await translateTexts(titles.map(x=>x.e.name_en));if(run!==exerciseFilterRun)return;titles.forEach((x,i)=>{if(grid.contains(x.title)&&translated[i])x.title.textContent=translated[i]});const labels=metaRows.flatMap(x=>[x.e.body_part||"",x.e.equipment||"bodyweight",x.e.difficulty||""]);const trLabels=await translateTexts(labels);if(run!==exerciseFilterRun)return;metaRows.forEach((x,i)=>{if(grid.contains(x.meta)){x.meta.textContent=(trLabels[i*3]||trExercise(x.e.body_part))+" · "+(trLabels[i*3+1]||trExercise(x.e.equipment||"bodyweight"));x.chip.textContent=trLabels[i*3+2]||trExercise(x.e.difficulty)}})})();
 }
 async function showExercise(id){
  const e=exerciseData.find(x=>x.id===id);if(!e)return;
@@ -852,10 +852,10 @@ async function showExercise(id){
  const loading=document.createElement("p");loading.className="muted";loading.textContent="Hareket bilgileri Türkçeye çevriliyor...";box.append(loading);
  const muscles=[...(e.primary_muscles||[]),...(e.secondary_muscles||[])];
  const instructions=e.instructions_en||[],tips=e.tips_en||[];
- const source=[e.name_en,e.description_en||"",...muscles,...instructions,...tips];
+ const source=[e.name_en,e.description_en||"",e.equipment||"bodyweight",e.difficulty||"",...muscles,...instructions,...tips];
  const translated=await translateTexts(source);
  const name=translated[0]||trExercise(e.name_en),description=translated[1]||"";
- let index=2;const translatedMuscles=translated.slice(index,index+muscles.length);index+=muscles.length;
+ const translatedEquipment=translated[2]||trExercise(e.equipment||"bodyweight"),translatedDifficulty=translated[3]||trExercise(e.difficulty);let index=4;const translatedMuscles=translated.slice(index,index+muscles.length);index+=muscles.length;
  const translatedInstructions=translated.slice(index,index+instructions.length);index+=instructions.length;
  const translatedTips=translated.slice(index,index+tips.length);
  box.replaceChildren();
@@ -863,7 +863,7 @@ async function showExercise(id){
  const img=document.createElement("img");img.src="https://exercise-dataset.com/"+(e.images?.flat?.start||e.images?.flat?.main||"");img.alt=name;
  const desc=document.createElement("p");desc.className="muted";desc.textContent=description;
  const muscleLine=document.createElement("p");muscleLine.textContent="Çalışan kaslar: "+translatedMuscles.map((x,i)=>x||trExercise(muscles[i])).join(", ");
- const equip=document.createElement("p");equip.className="muted";equip.textContent="Ekipman: "+trExercise(e.equipment||"bodyweight")+" · Zorluk: "+trExercise(e.difficulty);
+ const equip=document.createElement("p");equip.className="muted";equip.textContent="Ekipman: "+translatedEquipment+" · Zorluk: "+translatedDifficulty;
  const h=document.createElement("h3");h.textContent="Nasıl yapılır?";
  const ol=document.createElement("ol");translatedInstructions.forEach((s,i)=>{const li=document.createElement("li");li.textContent=s||instructions[i];ol.append(li)});
  const tipHead=document.createElement("h3");tipHead.textContent="Teknik ipuçları";
