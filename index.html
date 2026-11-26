@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080b09">
+<title>NEXFIT | Gücünü Keşfet</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#080b09;color:#f5f5f5;line-height:1.6}
+header{display:flex;justify-content:space-between;align-items:center;padding:22px 8%;border-bottom:1px solid #202820}
+.logo{font-size:27px;font-weight:900;letter-spacing:2px}
+.logo span{color:#b6ff35}
+nav a{color:white;text-decoration:none;margin-left:25px;font-size:14px}
+.lang{background:#b6ff35;color:#080b09;border:0;padding:9px 14px;font-weight:bold;cursor:pointer;border-radius:5px}
+.hero{min-height:580px;padding:100px 9%;display:flex;align-items:center;background:linear-gradient(90deg,#080b09 15%,rgba(8,11,9,.8)),url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1600') center/cover}
+.hero-content{max-width:650px}
+.tag{color:#b6ff35;letter-spacing:3px;font-size:13px;font-weight:bold}
+h1{font-size:clamp(42px,7vw,76px);line-height:1.08;margin:20px 0}
+h1 span{color:#b6ff35}
+.hero p{color:#b8beb8;font-size:18px;max-width:540px}
+.btn{display:inline-block;background:#b6ff35;color:#080b09;text-decoration:none;font-weight:bold;padding:15px 25px;border-radius:5px;margin-top:30px}
+section{padding:75px 9%}
+.section-title{text-align:center;font-size:35px;margin-bottom:40px}
+.section-title span{color:#b6ff35}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.card{background:#111711;border:1px solid #253025;padding:28px;border-radius:10px}
+.card .symbol{font-size:30px;color:#b6ff35}
+.card h3{margin:14px 0 8px}
+.card p{color:#aab2aa;font-size:14px}
+.cta{text-align:center;background:#111711}
+footer{text-align:center;padding:30px;color:#778077;border-top:1px solid #202820}
+@media(max-width:650px){nav a{margin-left:9px;font-size:12px}header{padding:18px 5%}.hero{padding:80px 7%;min-height:520px}section{padding:55px 7%}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">NEX<span>FIT</span></div>
+<nav>
+<a href="#features" data-tr="Özellikler" data-en="Features">Özellikler</a>
+<a href="#about" data-tr="Hakkımızda" data-en="About">Hakkımızda</a>
+<button class="lang" onclick="toggleLang()">EN</button>
+</nav>
+</header>
+<main>
+<div class="hero">
+<div class="hero-content">
+<div class="tag" data-tr="YENİ NESİL FİTNESS DENEYİMİ" data-en="NEXT GENERATION FITNESS">YENİ NESİL FİTNESS DENEYİMİ</div>
+<h1 data-tr="SINIRLARINI<br><span>YENİDEN</span><br>TANIMLA." data-en="REDEFINE<br><span>YOUR</span><br>LIMITS.">SINIRLARINI<br><span>YENİDEN</span><br>TANIMLA.</h1>
+<p data-tr="Antrenmanını planla, beslenmeni takip et ve gelişimini tek bir platformdan yönet. Değişim şimdi başlıyor." data-en="Plan your workouts, track your nutrition and manage your progress in one platform. Your transformation starts now.">Antrenmanını planla, beslenmeni takip et ve gelişimini tek bir platformdan yönet. Değişim şimdi başlıyor.</p>
+<a href="#features" class="btn" data-tr="NEXFIT'İ KEŞFET →" data-en="DISCOVER NEXFIT →">NEXFIT'İ KEŞFET →</a>
+</div>
+</div>
+<section id="features">
+<h2 class="section-title" data-tr="TEK PLATFORM. <span>DAHA GÜÇLÜ SEN.</span>" data-en="ONE PLATFORM. <span>A STRONGER YOU.</span>">TEK PLATFORM. <span>DAHA GÜÇLÜ SEN.</span></h2>
+<div class="cards">
+<div class="card"><div class="symbol">↗</div><h3 data-tr="Akıllı Antrenman" data-en="Smart Training">Akıllı Antrenman</h3><p data-tr="Hedeflerine uygun antrenman programlarını keşfet ve gelişimini takip et." data-en="Discover workouts tailored to your goals and track your progress.">Hedeflerine uygun antrenman programlarını keşfet ve gelişimini takip et.</p></div>
+<div class="card"><div class="symbol">◈</div><h3 data-tr="Beslenme Takibi" data-en="Nutrition Tracking">Beslenme Takibi</h3><p data-tr="Kalori, protein, karbonhidrat ve yağ hedeflerini yönet." data-en="Manage your calorie, protein, carb and fat goals.">Kalori, protein, karbonhidrat ve yağ hedeflerini yönet.</p></div>
+<div class="card"><div class="symbol">✦</div><h3 data-tr="Gelişim Takibi" data-en="Progress Tracking">Gelişim Takibi</h3><p data-tr="Antrenmanlarını ve fiziksel gelişimini düzenli olarak kaydet." data-en="Record your workouts and physical progress consistently.">Antrenmanlarını ve fiziksel gelişimini düzenli olarak kaydet.</p></div>
+<div class="card"><div class="symbol">◎</div><h3 data-tr="Dijital Koç" data-en="Digital Coach">Dijital Koç</h3><p data-tr="Hedeflerine ulaşman için sana rehberlik edecek dijital deneyim." data-en="A digital experience to guide you towards your goals.">Hedeflerine ulaşman için sana rehberlik edecek dijital deneyim.</p></div>
+</div>
+</section>
+<section class="cta" id="about">
+<h2 class="section-title" data-tr="DEĞİŞİM <span>BUGÜN BAŞLAR.</span>" data-en="YOUR CHANGE <span>STARTS TODAY.</span>">DEĞİŞİM <span>BUGÜN BAŞLAR.</span></h2>
+<p data-tr="Daha güçlü, daha sağlıklı ve daha kararlı bir sen için." data-en="For a stronger, healthier and more determined you.">Daha güçlü, daha sağlıklı ve daha kararlı bir sen için.</p>
+<a href="mailto:hello@nexfit.com" class="btn" data-tr="BİZİMLE İLETİŞİME GEÇ" data-en="CONTACT US">BİZİMLE İLETİŞİME GEÇ</a>
+</section>
+</main>
+<footer>© 2026 NEXFIT. <span data-tr="Tüm hakları saklıdır." data-en="All rights reserved.">Tüm hakları saklıdır.</span></footer>
+<script>
+let lang='tr';
+function toggleLang(){
+lang=lang==='tr'?'en':'tr';
+document.documentElement.lang=lang;
+document.querySelectorAll('[data-tr]').forEach(el=>{
+el.innerHTML=el.dataset[lang];
+});
+document.querySelector('.lang').textContent=lang==='tr'?'EN':'TR';
+}
+</script>
+</body>
+</html>
