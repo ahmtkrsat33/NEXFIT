@@ -75,7 +75,7 @@ h3{font-size:15px;margin:0 0 9px}
 .day{background:#1b211c;border-radius:8px;text-align:center;padding:12px 2px;font-size:11px;color:#9aa49a}
 .day b{display:block;font-size:15px;color:white;margin-bottom:8px}
 .day.done{border:1px solid #80b92c;color:var(--green)}
-.record-with-delete{display:flex;align-items:center;justify-content:space-between;gap:12px}.record-info{display:flex;flex-direction:column;gap:5px;min-width:0}.record-info small{overflow-wrap:anywhere}.record-delete{flex-shrink:0;border:1px solid #623b3b;background:#241515;color:#ff8b8b;border-radius:9px;padding:8px 13px;font-weight:700}.record-delete:hover{background:#3a1c1c}.record-delete:disabled{opacity:.6;cursor:wait}.record{background:#1a211b;padding:14px;border-radius:8px;margin:9px 0;font-size:13px}
+.progress-kpis{grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 0 22px}.progress-kpi{background:#0c120d;border:1px solid #2b392c;border-radius:12px;padding:15px;min-width:0}.progress-kpi small{display:block;color:#8d9a8d;font-size:9px;letter-spacing:1px;line-height:1.5}.progress-kpi b{display:block;color:var(--green);font-size:clamp(19px,3vw,27px);margin-top:8px;overflow-wrap:anywhere}.progress-chart-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 10px}.progress-chart-head h3{margin:0}.progress-chart-head select{max-width:230px;width:48%;margin:0}.progress-chart{min-height:150px;display:flex;align-items:end;gap:8px;padding:14px 8px 0;border-bottom:1px solid #344034}.progress-bar-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:end;height:145px;gap:7px}.progress-bar{width:min(34px,75%);min-height:4px;background:linear-gradient(180deg,#caff59,#75ad18);border-radius:7px 7px 2px 2px;box-shadow:0 0 14px #b7ff2720}.progress-bar-col small{font-size:9px;color:#a2afa2;white-space:nowrap}.progress-bar-col span{font-size:10px;color:#dce7da}.personal-records{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}.pr-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;background:#0d130e;border:1px solid #29372a;border-radius:10px}.pr-item b{font-size:12px}.pr-item strong{color:var(--green);white-space:nowrap}.progress-empty{width:100%;align-self:center;text-align:center;color:var(--muted);font-size:12px;padding:30px 0}@media(max-width:600px){.progress-kpis{gap:7px}.progress-kpi{padding:10px}.progress-kpi small{font-size:8px}.progress-chart-head{align-items:flex-start;flex-direction:column}.progress-chart-head select{width:100%;max-width:none}.progress-chart{gap:4px}.progress-bar-col{height:125px}.progress-bar-col small{font-size:8px}}.record-with-delete{display:flex;align-items:center;justify-content:space-between;gap:12px}.record-info{display:flex;flex-direction:column;gap:5px;min-width:0}.record-info small{overflow-wrap:anywhere}.record-delete{flex-shrink:0;border:1px solid #623b3b;background:#241515;color:#ff8b8b;border-radius:9px;padding:8px 13px;font-weight:700}.record-delete:hover{background:#3a1c1c}.record-delete:disabled{opacity:.6;cursor:wait}.record{background:#1a211b;padding:14px;border-radius:8px;margin:9px 0;font-size:13px}
 .foodresults{margin-top:8px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#0c110d;max-height:320px;overflow-y:auto}
 .foodresult{display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:13px;background:transparent;border:0;border-bottom:1px solid #263027;color:var(--text)}
 .foodresult:last-child{border-bottom:0}.foodresult:hover{background:#1b2618}.foodresult small{display:block;color:var(--muted);margin-top:4px}
@@ -410,6 +410,18 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
     <div class="eyebrow">YOUR PROGRESS</div>
     <h1>Geçmiş <span class="green">Kayıtların</span></h1>
     <p class="muted">Kaydettiğin antrenman ve beslenme kayıtları.</p>
+   </div>
+   <div class="card progress-center" style="margin-top:16px">
+    <div class="eyebrow">NEXFIT PERFORMANCE ANALYTICS</div><h2 style="margin-top:8px">Gelişim merkezim</h2>
+    <div class="grid progress-kpis">
+     <div class="progress-kpi"><small>TOPLAM ANTRENMAN KAYDI</small><b id="progressWorkoutCount">0</b></div>
+     <div class="progress-kpi"><small>TOPLAM KALDIRILAN AĞIRLIK</small><b id="progressVolume">0 kg</b></div>
+     <div class="progress-kpi"><small>EN YÜKSEK AĞIRLIK</small><b id="progressBest">—</b></div>
+    </div>
+    <div class="progress-chart-head"><div><h3>Hareket gelişimi</h3><p class="muted">Seçtiğin harekette son kayıtlarının ağırlık değişimi.</p></div><select id="progressExercise" onchange="renderProgressChart(window.nexfitWorkoutCache||[])" aria-label="Gelişimi görüntülenecek hareket"></select></div>
+    <div id="progressChart" class="progress-chart"><p class="muted">Gelişim grafiği için antrenman kaydet.</p></div>
+    <div class="sectionhead"><h3>Kişisel rekorlarım</h3><span class="green">EN İYİ AĞIRLIKLAR</span></div>
+    <div id="personalRecords" class="personal-records"><p class="muted">Henüz rekor bulunmuyor.</p></div>
    </div>
    <div class="grid twocol" style="margin-top:16px">
     <div class="card"><h2>🏋️ Antrenmanlar</h2><div id="workoutList"></div></div>
@@ -920,6 +932,32 @@ async function saveNutrition(){
  }
 }
 
+window.nexfitWorkoutCache=[];
+function renderProgressChart(rows){
+ const box=$("progressChart"),select=$("progressExercise");if(!box||!select)return;
+ const chosen=select.value;
+ const selected=rows.filter(x=>String(x.exercise_name||"")===chosen).sort((a,b)=>String(a.workout_date||"").localeCompare(String(b.workout_date||""))||String(a.created_at||"").localeCompare(String(b.created_at||""))).slice(-8);
+ box.replaceChildren();
+ if(!selected.length){const empty=document.createElement("div");empty.className="progress-empty";empty.textContent=rows.length?"Bu hareket için henüz kayıt yok.":"Gelişim grafiği için antrenman kaydet.";box.append(empty);return}
+ const max=Math.max(1,...selected.map(x=>Number(x.weight)||0));
+ selected.forEach(x=>{const col=document.createElement("div");col.className="progress-bar-col";const val=document.createElement("span");val.textContent=(Number(x.weight)||0).toLocaleString("tr-TR")+" kg";const bar=document.createElement("div");bar.className="progress-bar";bar.style.height=Math.max(4,((Number(x.weight)||0)/max)*100)+"%";const date=document.createElement("small");date.textContent=String(x.workout_date||"").slice(5).replace("-","/");col.append(val,bar,date);box.append(col)});
+}
+function renderProgress(rows){
+ window.nexfitWorkoutCache=rows||[];
+ const count=rows.length,volume=rows.reduce((sum,x)=>sum+(Number(x.sets)||0)*(Number(x.reps)||0)*(Number(x.weight)||0),0),best=rows.reduce((m,x)=>Math.max(m,Number(x.weight)||0),0);
+ $("progressWorkoutCount").textContent=count.toLocaleString("tr-TR");
+ $("progressVolume").textContent=Math.round(volume).toLocaleString("tr-TR")+" kg";
+ $("progressBest").textContent=best?best.toLocaleString("tr-TR")+" kg":"—";
+ const select=$("progressExercise"),current=select.value,names=[...new Set(rows.map(x=>String(x.exercise_name||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"tr"));
+ select.replaceChildren();
+ if(!names.length){const opt=document.createElement("option");opt.value="";opt.textContent="Henüz hareket yok";select.append(opt)}else names.forEach(name=>{const opt=document.createElement("option");opt.value=name;opt.textContent=name;select.append(opt)});
+ if(names.includes(current))select.value=current;
+ const records=new Map();rows.forEach(x=>{const name=String(x.exercise_name||"").trim(),weight=Number(x.weight)||0;if(!name)return;if(!records.has(name)||weight>records.get(name).weight)records.set(name,{weight,date:x.workout_date||""})});
+ const sorted=[...records.entries()].sort((a,b)=>b[1].weight-a[1].weight).slice(0,6),pr=$("personalRecords");pr.replaceChildren();
+ if(!sorted.length){const p=document.createElement("p");p.className="muted";p.textContent="İlk antrenmanını kaydettiğinde rekorların burada görünecek.";pr.append(p)}
+ sorted.forEach(([name,data])=>{const item=document.createElement("div");item.className="pr-item";const title=document.createElement("b");title.textContent=name;const val=document.createElement("strong");val.textContent=data.weight.toLocaleString("tr-TR")+" kg";item.append(title,val);pr.append(item)});
+ renderProgressChart(rows);
+}
 async function loadData(){
  if(!user)return;
 
@@ -932,6 +970,7 @@ async function loadData(){
 
  const workouts=w.data||[];
  const foods=n.data||[];
+ renderProgress(workouts);
  const todays=foods.filter(x=>x.meal_date===today);
  const todayW=workouts.filter(x=>x.workout_date===today);
  const calories=todays.reduce((s,x)=>s+(Number(x.calories)||0),0);
