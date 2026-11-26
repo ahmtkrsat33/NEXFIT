@@ -79,7 +79,7 @@ h3{font-size:15px;margin:0 0 9px}
 .foodresults{margin-top:8px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#0c110d;max-height:320px;overflow-y:auto}
 .foodresult{display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:13px;background:transparent;border:0;border-bottom:1px solid #263027;color:var(--text)}
 .foodresult:last-child{border-bottom:0}.foodresult:hover{background:#1b2618}.foodresult small{display:block;color:var(--muted);margin-top:4px}
-.foodpreview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.nutrition-coach{margin-top:16px;border:1px solid #35452b;background:linear-gradient(135deg,#182218,#101510);}.coach-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.coach-tag{font-size:10px;letter-spacing:1.8px;color:var(--green);font-weight:900}.coach-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}.coach-macro{background:#0b100c;border:1px solid #29352a;border-radius:10px;padding:13px;min-width:0}.coach-macro small{display:block;color:#98a397;font-size:11px}.coach-macro strong{display:block;font-size:20px;margin:7px 0 3px;overflow-wrap:anywhere}.coach-macro em{font-style:normal;color:#aeb8aa;font-size:10px}.coach-track{height:6px;background:#293329;border-radius:9px;overflow:hidden;margin-top:10px}.coach-fill{height:100%;width:0;background:var(--green);border-radius:9px;transition:width .25s}.coach-note{font-size:12px;color:#aeb8aa;margin:14px 0 0;line-height:1.5}.coach-note strong{color:var(--green)}@media(max-width:700px){.coach-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.coach-macro strong{font-size:18px}}.foodpreview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
 .macro{background:#1a211b;border:1px solid var(--line);border-radius:9px;padding:12px}
 .macro b{display:block;font-size:20px;color:var(--green);margin-bottom:4px}.macro small{font-size:10px;color:var(--muted)}
 .selectedfood{padding:12px;background:#1b2618;border:1px solid #48652b;border-radius:9px;margin-top:12px}
@@ -355,6 +355,16 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
     <h1>Beslenme <span class="green">Takibi</span></h1>
     <p class="muted">Yemek, içecek, kuruyemiş, tatlı, meyve ve sebzelerini ara; miktarı girince değerler otomatik hesaplansın.</p>
    </div>
+   <div class="card nutrition-coach">
+    <div class="coach-head"><div><div class="coach-tag">NEXFIT SMART NUTRITION</div><h2 style="margin:7px 0">Günlük Beslenme Koçun</h2><p class="muted" style="margin:0">Hedeflerini ve bugün aldığın makroları anlık takip et.</p></div><button class="btn dark" type="button" onclick="tab('wellness')">HEDEFLERİ DÜZENLE</button></div>
+    <div class="coach-grid">
+     <div class="coach-macro"><small>Kalori</small><strong id="coachCalories">—</strong><em id="coachCaloriesMeta">Hedef belirlenmedi</em><div class="coach-track"><div class="coach-fill" id="coachCaloriesBar"></div></div></div>
+     <div class="coach-macro"><small>Protein</small><strong id="coachProtein">—</strong><em id="coachProteinMeta">Hedef belirlenmedi</em><div class="coach-track"><div class="coach-fill" id="coachProteinBar"></div></div></div>
+     <div class="coach-macro"><small>Karbonhidrat</small><strong id="coachCarbs">—</strong><em id="coachCarbsMeta">Hedef belirlenmedi</em><div class="coach-track"><div class="coach-fill" id="coachCarbsBar"></div></div></div>
+     <div class="coach-macro"><small>Yağ</small><strong id="coachFat">—</strong><em id="coachFatMeta">Hedef belirlenmedi</em><div class="coach-track"><div class="coach-fill" id="coachFatBar"></div></div></div>
+    </div>
+    <p class="coach-note" id="coachAdvice">Kişisel hedeflerini oluşturmak için Vücut & Yaşam Takibi bölümünden profil bilgilerini kaydet.</p>
+   </div>
    <div class="card" style="margin-top:16px">
     <h2>Besin Ara ve Öğün Ekle</h2>
     <label>Besin adı</label>
@@ -536,7 +546,7 @@ function tab(id,btn){
  $("welcome").textContent={dashboard:"Genel Bakış",workout:"Antrenman Merkezi",programs:"Programlarım",nutrition:"Beslenme Merkezi",history:"Kayıtlarım",exercises:"Hareket Kütüphanesi",wellness:"Vücut & Yaşam Takibi"}[id];
  if(id==="dashboard"||id==="history")loadData();
  if(id==="programs")loadTrainingPlans();
- if(id==="nutrition")loadFoodCatalog();
+ if(id==="nutrition"){loadFoodCatalog();loadData();}
  if(id==="exercises")loadExercises();
  if(id==="wellness")loadWellness();
 }
@@ -958,6 +968,35 @@ function renderProgress(rows){
  sorted.forEach(([name,data])=>{const item=document.createElement("div");item.className="pr-item";const title=document.createElement("b");title.textContent=name;const val=document.createElement("strong");val.textContent=data.weight.toLocaleString("tr-TR")+" kg";item.append(title,val);pr.append(item)});
  renderProgressChart(rows);
 }
+function renderNutritionCoach(todays){
+ const p=wellnessData().profile||{};
+ const totals={
+  calories:(todays||[]).reduce((a,x)=>a+(Number(x.calories)||0),0),
+  protein:(todays||[]).reduce((a,x)=>a+(Number(x.protein)||0),0),
+  carbs:(todays||[]).reduce((a,x)=>a+(Number(x.carbohydrates??x.carbs)||0),0),
+  fat:(todays||[]).reduce((a,x)=>a+(Number(x.fat)||0),0)
+ };
+ const metrics=[
+  {key:"calories",target:Number(p.calories)||0,unit:"kcal",label:"Kalori"},
+  {key:"protein",target:Number(p.protein)||0,unit:"g",label:"Protein"},
+  {key:"carbs",target:Number(p.carbs)||0,unit:"g",label:"Karbonhidrat"},
+  {key:"fat",target:Number(p.fat)||0,unit:"g",label:"Yağ"}
+ ];
+ metrics.forEach(m=>{
+  const current=totals[m.key],remaining=m.target?m.target-current:0;
+  const value=$( "coach"+m.key.charAt(0).toUpperCase()+m.key.slice(1));
+  const meta=$( "coach"+m.key.charAt(0).toUpperCase()+m.key.slice(1)+"Meta");
+  const bar=$( "coach"+m.key.charAt(0).toUpperCase()+m.key.slice(1)+"Bar");
+  if(!value||!meta||!bar)return;
+  value.textContent=current.toLocaleString("tr-TR",{maximumFractionDigits:1})+" "+m.unit;
+  meta.textContent=m.target?(remaining>=0?"Kalan "+remaining.toLocaleString("tr-TR",{maximumFractionDigits:1})+" "+m.unit:"Hedef "+Math.abs(remaining).toLocaleString("tr-TR",{maximumFractionDigits:1})+" "+m.unit+" aşıldı"):"Hedef belirlenmedi";
+  bar.style.width=m.target?Math.min(100,current/m.target*100)+"%":"0%";
+ });
+ const advice=$("coachAdvice");
+ if(!p.calories){advice.textContent="Kişisel hedeflerini oluşturmak için Vücut & Yaşam Takibi bölümünde yaş, boy, kilo ve aktivite bilgilerini girip profilini kaydet.";return}
+ const left=p.calories-totals.calories;
+ advice.textContent=left>0?"Bugün yaklaşık "+Math.round(left).toLocaleString("tr-TR")+" kcal hedefin kaldı. Dengeli öğünlerle ilerle.":left<0?"Günlük kalori hedefini yaklaşık "+Math.round(Math.abs(left)).toLocaleString("tr-TR")+" kcal aştın. Tek bir gün yerine genel haftalık düzenine odaklan.":"Günlük kalori hedefine ulaştın. Su tüketimini ve öğün kaliteni de takip etmeyi unutma.";
+}
 async function loadData(){
  if(!user)return;
 
@@ -972,6 +1011,7 @@ async function loadData(){
  const foods=n.data||[];
  renderProgress(workouts);
  const todays=foods.filter(x=>x.meal_date===today);
+ renderNutritionCoach(todays);
  const todayW=workouts.filter(x=>x.workout_date===today);
  const calories=todays.reduce((s,x)=>s+(Number(x.calories)||0),0);
  const protein=todays.reduce((s,x)=>s+(Number(x.protein)||0),0);
