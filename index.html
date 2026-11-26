@@ -26,24 +26,68 @@ function renderAppleHealthImport(){
  if(message)message.textContent="Son aktarım: "+(health.importedAt?new Date(health.importedAt).toLocaleString("tr-TR"):"—")+". "+keys.length+" günlük veri bu cihazdaki profilinde saklanıyor.";
 }
 async function importAppleHealthFile(file){
- if(!file)return;const message=$("appleHealthMessage"),status=$("appleHealthStatus");if(message)message.textContent="Dosya okunuyor...";
+ if(!file)return;
+ const message=$("appleHealthMessage"),status=$("appleHealthStatus"),picker=$("appleHealthFile");
+ if(message)message.textContent="Dosya hazırlanıyor…";
+ if(status)status.textContent="Dosya okunuyor";
  try{
-  let raw="";if(file.name.toLowerCase().endsWith(".zip")){if(!window.JSZip)throw new Error("ZIP okuyucu yüklenemedi. Sayfayı yenileyip tekrar dene.");const zip=await JSZip.loadAsync(await file.arrayBuffer()),entry=Object.values(zip.files).find(x=>!x.dir&&x.name.toLowerCase().endsWith("export.xml"));if(!entry)throw new Error("ZIP içinde export.xml bulunamadı.");raw=await entry.async("string")}else raw=await file.text();
-  const xml=new DOMParser().parseFromString(raw,"application/xml");if(xml.querySelector("parsererror"))throw new Error("Apple Sağlık XML dosyası okunamadı.");const allRecords=Array.from(xml.getElementsByTagName("Record"));if(!allRecords.length)throw new Error("Dosyada sağlık kaydı bulunamadı.");const gloryRecords=allRecords.filter(x=>(x.getAttribute("sourceName")||"").toLocaleLowerCase("tr-TR").includes("gloryfit")),records=gloryRecords.length?gloryRecords:allRecords;const sourceMode=gloryRecords.length?"GloryFit kaynağı":"Apple Sağlık tüm kaynakları (GloryFit etiketi bulunamadı)";
+  const lowerName=String(file.name||"").toLowerCase();
+  let raw="";
+  if(lowerName.endsWith(".zip")){
+   if(!window.JSZip)throw new Error("ZIP okuyucu yüklenemedi. Sayfayı yenile. Tekrar olmazsa ZIP'i bilgisayarda açıp export.xml dosyasını seç.");
+   const zip=await JSZip.loadAsync(file,{checkCRC32:false});
+   const entry=Object.values(zip.files).find(x=>!x.dir&&/(^|\/)export\.xml$/i.test(x.name));
+   if(!entry)throw new Error("ZIP içinde export.xml bulunamadı. Apple Sağlık uygulamasından alınan orijinal dışa aktarım ZIP dosyasını seç.");
+   if(message)message.textContent="Apple Sağlık verileri çözümleniyor…";
+   raw=await entry.async("string");
+  }else if(lowerName.endsWith(".xml")||file.type.includes("xml")||!file.type){
+   raw=await file.text();
+  }else throw new Error("Desteklenmeyen dosya türü. .zip veya export.xml seç.");
+  if(!raw||!raw.includes("<"))throw new Error("Dosya boş veya geçerli XML değil.");
+  if(message)message.textContent="Sağlık kayıtları ayrıştırılıyor…";
+  // Apple export.xml içindeki kayıtlar çoğunlukla tek satırlık Record etiketleridir.
+  // DOMParser yerine etiketleri doğrudan okuyarak bellek tüketimini azaltır.
+  const decodeXml=v=>String(v||"").replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&");
+  const attr=(tag,name)=>{const re=new RegExp("(?:^|\\s)"+name+"\\s*=\\s*(['\\\"])(.*?)\\1","i");const m=tag.match(re);return m?decodeXml(m[2]):""};
   const daily={},keyOf=v=>{const x=new Date(v);return Number.isNaN(x.getTime())?null:x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")},get=k=>daily[k]||(daily[k]={steps:0,activeEnergy:0,heartRateSum:0,heartRateCount:0,sleepMinutes:0,distanceKm:0,weightKg:null});
-  records.forEach(x=>{const type=x.getAttribute("type")||"",key=keyOf(x.getAttribute("startDate")),v=Number(x.getAttribute("value")),unit=(x.getAttribute("unit")||"").toLowerCase();if(!key)return;const d=get(key);
+  let recordCount=0,gloryCount=0,match,recordRe=/<Record\b[^>]*>/g;
+  while((match=recordRe.exec(raw))!==null){
+   const tag=match[0],type=attr(tag,"type"),source=attr(tag,"sourceName");
+   recordCount++;
+   if(source.toLocaleLowerCase("tr-TR").includes("gloryfit"))gloryCount++;
+   const key=keyOf(attr(tag,"startDate"));if(!key)continue;
+   const v=Number(attr(tag,"value")),unit=attr(tag,"unit").toLowerCase(),d=get(key);
    if(type==="HKQuantityTypeIdentifierStepCount"&&Number.isFinite(v))d.steps+=v;
    else if(type==="HKQuantityTypeIdentifierActiveEnergyBurned"&&Number.isFinite(v))d.activeEnergy+=unit.includes("kj")?v/4.184:v;
    else if(type==="HKQuantityTypeIdentifierHeartRate"&&Number.isFinite(v)){d.heartRateSum+=v;d.heartRateCount++}
    else if(type==="HKQuantityTypeIdentifierDistanceWalkingRunning"&&Number.isFinite(v))d.distanceKm+=unit==="mi"?v*1.60934:unit==="m"?v/1000:v;
    else if(type==="HKQuantityTypeIdentifierBodyMass"&&Number.isFinite(v))d.weightKg=unit==="lb"?v*.453592:v;
-  });
-  records.filter(x=>(x.getAttribute("type")||"")==="HKCategoryTypeIdentifierSleepAnalysis").forEach(x=>{const k=keyOf(x.getAttribute("startDate")),a=new Date(x.getAttribute("startDate")),b=new Date(x.getAttribute("endDate")),v=x.getAttribute("value")||"";if(k&&!Number.isNaN(a.getTime())&&!Number.isNaN(b.getTime())&&/Asleep|Core|Deep|REM/i.test(v)&&!/InBed/i.test(v))get(k).sleepMinutes+=Math.max(0,(b-a)/60000)});
+   else if(type==="HKCategoryTypeIdentifierSleepAnalysis"){
+    const endDate=new Date(attr(tag,"endDate")),beginDate=new Date(attr(tag,"startDate")),value=attr(tag,"value");
+    if(!Number.isNaN(beginDate.getTime())&&!Number.isNaN(endDate.getTime())&&/Asleep|Core|Deep|REM/i.test(value)&&!/InBed/i.test(value))d.sleepMinutes+=Math.max(0,(endDate-beginDate)/60000);
+   }
+  }
+  if(!recordCount)throw new Error("XML içinde Apple Sağlık Record kayıtları bulunamadı. Doğru export.xml dosyasını seçtiğinden emin ol.");
+  if(message)message.textContent=recordCount.toLocaleString("tr-TR")+" kayıt tarandı; günlük özet hazırlanıyor…";
   Object.keys(daily).forEach(k=>{const d=daily[k];d.heartRate=d.heartRateCount?d.heartRateSum/d.heartRateCount:null;delete d.heartRateSum;delete d.heartRateCount;if(!d.steps&&!d.activeEnergy&&!d.heartRate&&!d.sleepMinutes&&!d.distanceKm&&d.weightKg===null)delete daily[k]});
-  const keys=Object.keys(daily).sort();if(!keys.length)throw new Error("Desteklenen adım, nabız, enerji veya uyku verisi bulunamadı.");const d=wellnessData();d.appleHealth={daily,importedAt:new Date().toISOString(),sourceFile:file.name,sourceMode};
-  const latest=daily[keys[keys.length-1]];if(latest.sleepMinutes){d.days=d.days||{};d.days[keys[keys.length-1]]=d.days[keys[keys.length-1]]||{};d.days[keys[keys.length-1]].sleep=Math.round(latest.sleepMinutes/60*10)/10}putWellness(d);
-  renderAppleHealthImport();renderDailyGoals(window.nexfitWorkoutRows||[],window.nexfitFoodRows||[]);if(message)message.textContent=keys.length+" günlük veri aktarıldı ("+sourceMode+"). Ham dosya sunucuya gönderilmedi.";if(status)status.textContent=keys.length+" gün aktarıldı";say("Apple Sağlık verileri NEXFIT'e aktarıldı.");
- }catch(e){if(message)message.textContent="Aktarım yapılamadı: "+e.message;if(status)status.textContent="Aktarım hatası";say("Apple Sağlık dosyası okunamadı.")}
+  const keys=Object.keys(daily).sort();if(!keys.length)throw new Error("Dosya okundu ("+recordCount+" kayıt) ancak desteklenen adım, nabız, enerji, mesafe veya uyku verisi bulunamadı. GloryFit'in Apple Sağlık'a veri yazma izinlerini kontrol et.");
+  const sourceMode=gloryCount?"GloryFit kaynaklı kayıtlar":"Apple Sağlık kayıtları (GloryFit etiketi bulunamadı)";
+  const d=wellnessData();d.appleHealth={daily,importedAt:new Date().toISOString(),sourceFile:file.name,sourceMode,recordCount};
+  const latest=daily[keys[keys.length-1]];
+  if(latest.sleepMinutes){d.days=d.days||{};d.days[keys[keys.length-1]]=d.days[keys[keys.length-1]]||{};d.days[keys[keys.length-1]].sleep=Math.round(latest.sleepMinutes/60*10)/10}
+  putWellness(d);
+  renderAppleHealthImport();renderDailyGoals(window.nexfitWorkoutRows||[],window.nexfitFoodRows||[]);
+  if(message)message.textContent=keys.length+" günlük veri aktarıldı · "+recordCount.toLocaleString("tr-TR")+" kayıt tarandı · "+sourceMode+". Ham dosya sunucuya gönderilmedi.";
+  if(status)status.textContent=keys.length+" gün aktarıldı";
+  say("Apple Sağlık verileri NEXFIT'e aktarıldı.");
+ }catch(e){
+  console.error("NEXFIT Apple Health import error:",e);
+  if(message)message.textContent="Aktarım yapılamadı: "+(e&&e.message?e.message:"Bilinmeyen hata")+" Kayıtların silinmedi.";
+  if(status)status.textContent="Aktarım hatası";
+  say("Aktarım başarısız. Ayrıntı için Saat Verilerim bölümündeki mesajı kontrol et.");
+ }finally{
+  if(picker)picker.value="";
+ }
 }
 function clearAppleHealthImport(){const d=wellnessData();delete d.appleHealth;putWellness(d);renderAppleHealthImport();renderDailyGoals(window.nexfitWorkoutRows||[],window.nexfitFoodRows||[]);if($("appleHealthMessage"))$("appleHealthMessage").textContent="Aktarılan saat verileri bu cihazdan temizlendi."}
 function renderMeasurements(rows){const box=$("measurementList");if(!box)return;box.replaceChildren();if(!rows.length){box.textContent="Henüz ölçüm kaydı yok.";return}rows.forEach(x=>{const el=document.createElement("div");el.className="record";el.textContent=x.date+" · "+[x.weight&&("Kilo "+x.weight+" kg"),x.waist&&("Bel "+x.waist+" cm"),x.chest&&("Göğüs "+x.chest+" cm"),x.hip&&("Kalça "+x.hip+" cm")].filter(Boolean).join(" · ");box.append(el)})}
