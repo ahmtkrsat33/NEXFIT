@@ -1172,7 +1172,7 @@ function nexfitAiReply(question){
 }
 function nexfitAIChatKey(){return "nexfit_ai_chat_v1_"+(user?.id||"guest")}
 function saveNexfitAIChat(){
- try{const chat=$("aiChat");if(!chat)return;const messages=[...chat.querySelectorAll(".ai-message")].map(el=>({role:el.classList.contains("ai-user")?"user":"assistant",text:el.innerText.replace(/^NEXFIT KOÇ\\s*/,"").trim()})).filter(x=>x.text).slice(-60);localStorage.setItem(nexfitAIChatKey(),JSON.stringify(messages))}catch(error){console.warn("NEXFIT chat history could not be saved",error)}
+ try{const chat=$("aiChat");if(!chat)return;const messages=[...chat.querySelectorAll(".ai-message")].map(el=>({role:el.classList.contains("ai-user")?"user":"assistant",text:el.innerText.replace(/^NEXFIT KOÇ\s*/,"").trim()})).filter(x=>x.text).slice(-60);localStorage.setItem(nexfitAIChatKey(),JSON.stringify(messages))}catch(error){console.warn("NEXFIT chat history could not be saved",error)}
 }
 function restoreNexfitAIChat(){
  const chat=$("aiChat");if(!chat)return;
