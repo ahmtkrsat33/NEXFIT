@@ -3,340 +3,219 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#080b09">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEXFIT | Fitness Platform</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#080b09;--panel:#111811;--green:#b6ff35;--muted:#9ba69b;--border:#283329}
+:root{--green:#b5ff00;--bg:#080a08;--panel:#121612;--muted:#9ba39a}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:#fff;font-family:Arial,sans-serif}
-button,input{font:inherit}
-button{cursor:pointer}
-header{height:76px;padding:0 6%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
-.logo{font-size:27px;font-weight:900;letter-spacing:2px}
-.logo span{color:var(--green)}
-nav{display:flex;align-items:center;gap:12px}
-nav button,.outline{background:transparent;color:#fff;border:1px solid var(--border);padding:10px 15px;border-radius:6px}
-.primary{background:var(--green);color:#080b09;border:0;padding:13px 20px;border-radius:6px;font-weight:bold}
-.wrap{width:min(1100px,90%);margin:auto}
-.hero{min-height:490px;display:flex;align-items:center;background:linear-gradient(90deg,#080b09 20%,#080b09aa),url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1500') center/cover;padding:65px 8%}
-.hero-content{max-width:650px}
-.tag{color:var(--green);letter-spacing:3px;font-size:13px;font-weight:bold}
-h1{font-size:clamp(43px,7vw,76px);line-height:1.05;margin:20px 0}
-h1 span,.green{color:var(--green)}
-p{color:var(--muted);line-height:1.7}
-section{padding:65px 0}
-.section-title{text-align:center;font-size:34px;margin:0 0 35px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
-.card,.panel{background:var(--panel);border:1px solid var(--border);padding:24px;border-radius:10px}
-.card h3{margin-top:8px}
-.symbol{font-size:30px;color:var(--green)}
+body{margin:0;background:var(--bg);color:white;font-family:Arial,sans-serif}
+header{padding:20px 7%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #252b22}
+.logo{font-size:27px;font-weight:900;color:var(--green);letter-spacing:2px}
+button{background:var(--green);color:#090b07;border:0;padding:12px 18px;font-weight:bold;border-radius:7px;cursor:pointer}
+button.secondary{background:#252d22;color:white}
+input,select{width:100%;padding:13px;margin:7px 0 15px;background:#080b08;border:1px solid #333d30;border-radius:7px;color:white}
+main{max-width:1100px;margin:auto;padding:35px 20px}
+.hero{padding:70px 20px;text-align:center}
+h1{font-size:clamp(38px,7vw,75px);margin:15px 0}
+h1 span{color:var(--green)}
+p{color:var(--muted);line-height:1.6}
+.card{background:var(--panel);border:1px solid #293126;border-radius:12px;padding:22px;margin:15px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:15px}
 .hidden{display:none!important}
-#authArea{max-width:440px;margin:55px auto;padding:30px}
-#authArea h2{margin-top:0}
-input{width:100%;padding:13px;margin:7px 0 15px;background:#080d09;color:white;border:1px solid var(--border);border-radius:6px}
-label{font-size:13px;color:#c7d0c7}
-.form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.form-actions button{flex:1}
-.message{font-size:14px;min-height:22px;color:var(--green)}
-.dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:25px 0}
-.stat{background:var(--panel);border:1px solid var(--border);padding:20px;border-radius:9px}
-.stat strong{display:block;color:var(--green);font-size:28px;margin-top:8px}
-.forms{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
-.record{padding:13px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;align-items:center}
-.record small{display:block;color:var(--muted);margin-top:4px}
-.delete{background:transparent;border:1px solid #663b3b;color:#ff9999;padding:7px 10px;border-radius:5px}
-footer{text-align:center;border-top:1px solid var(--border);padding:25px;color:#778077}
-@media(max-width:600px){header{padding:0 5%;height:68px}.logo{font-size:22px}nav{gap:6px}nav button{padding:8px;font-size:12px}.hero{padding:55px 7%;min-height:430px}section{padding:45px 0}#authArea{margin:30px auto;padding:22px}}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}
+nav button{flex:1}
+.stat{font-size:28px;color:var(--green);font-weight:bold}
+small{color:var(--muted)}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="logo">NEX<span>FIT</span></div>
-  <nav>
-    <button onclick="showHome()">Ana Sayfa</button>
-    <button onclick="showAuth('login')" id="loginNav">Giriş Yap</button>
-    <button class="primary" onclick="showAuth('signup')" id="signupNav">Üye Ol</button>
-    <button class="hidden" id="logoutNav" onclick="logout()">Çıkış</button>
-  </nav>
+<div class="logo">NEXFIT.</div>
+<div>
+<button class="secondary" onclick="changeLang()" id="langBtn">EN</button>
+<button onclick="showAuth()">Giriş / Üyelik</button>
+</div>
 </header>
 
-<main id="home">
-  <div class="hero">
-    <div class="hero-content">
-      <div class="tag">NEXT GENERATION FITNESS</div>
-      <h1>SINIRLARINI<br><span>YENİDEN</span><br>TANIMLA.</h1>
-      <p>Antrenmanını planla, beslenmeni takip et ve gelişimini tek platformdan yönet. Değişim şimdi başlıyor.</p>
-      <button class="primary" onclick="showAuth('signup')">ÜCRETSİZ BAŞLA →</button>
-    </div>
-  </div>
-
-  <section class="wrap">
-    <h2 class="section-title">TEK PLATFORM. <span class="green">DAHA GÜÇLÜ SEN.</span></h2>
-    <div class="cards">
-      <div class="card"><div class="symbol">↗</div><h3>Akıllı Antrenman</h3><p>Egzersizlerini kaydet, set ve tekrarlarını takip et.</p></div>
-      <div class="card"><div class="symbol">◈</div><h3>Beslenme Takibi</h3><p>Kalori, protein, karbonhidrat ve yağ kayıtlarını tut.</p></div>
-      <div class="card"><div class="symbol">✦</div><h3>Gelişim Takibi</h3><p>Çalışmalarını ve günlük ilerlemeni takip et.</p></div>
-      <div class="card"><div class="symbol">◎</div><h3>Kişisel Panel</h3><p>Kendi kayıtlarına tek bir yerden ulaş.</p></div>
-    </div>
-  </section>
-</main>
-
-<section id="authArea" class="panel hidden">
-  <h2 id="authTitle">NEXFIT'e Giriş Yap</h2>
-  <p id="authDescription">Hesabına giriş yap ve gelişimine devam et.</p>
-  <form id="authForm">
-    <div id="nameField" class="hidden">
-      <label>Adın ve soyadın</label>
-      <input id="fullName" placeholder="Ad Soyad" autocomplete="name">
-    </div>
-    <label>E-posta adresin</label>
-    <input id="email" type="email" placeholder="ornek@mail.com" required autocomplete="email">
-    <label>Şifren</label>
-    <input id="password" type="password" placeholder="En az 6 karakter" required minlength="6" autocomplete="current-password">
-    <div class="form-actions">
-      <button class="primary" type="submit" id="authSubmit">Giriş Yap</button>
-      <button class="outline" type="button" onclick="switchAuth()">Diğer işlem</button>
-    </div>
-  </form>
-  <div class="message" id="authMessage"></div>
-  <p style="font-size:12px">Hesap oluşturarak NEXFIT kullanım koşullarını kabul etmiş olursun.</p>
+<section class="hero" id="home">
+<p>GÜCÜNÜ KEŞFET. SINIRLARINI AŞ.</p>
+<h1>BUILD YOUR <span>BEST</span> SELF.</h1>
+<p>Antrenmanını takip et, beslenmeni yönet, gelişimini gör.</p>
+<button onclick="showAuth()">HEMEN BAŞLA</button>
 </section>
 
-<main id="dashboard" class="wrap hidden">
-  <section>
-    <div class="dashboard-head">
-      <div>
-        <div class="tag">PERSONAL FITNESS SPACE</div>
-        <h2>MERHABA, <span class="green" id="userName">SPORCU</span></h2>
-        <p>Bugün kendin için bir adım daha at.</p>
-      </div>
-      <button class="outline" onclick="loadData()">↻ Yenile</button>
-    </div>
+<main>
+<section class="grid" id="features">
+<div class="card"><h2>🏋️ Antrenman</h2><p>Egzersizlerini ve ağırlıklarını kaydet.</p></div>
+<div class="card"><h2>🥗 Beslenme</h2><p>Kalori ve makro takibini yap.</p></div>
+<div class="card"><h2>📈 Gelişim</h2><p>Fitness yolculuğunu takip et.</p></div>
+</section>
 
-    <div class="stats">
-      <div class="stat">Antrenman kayıtları<strong id="workoutCount">0</strong></div>
-      <div class="stat">Beslenme kayıtları<strong id="foodCount">0</strong></div>
-      <div class="stat">Bugünkü kalori<strong id="calorieCount">0</strong></div>
-    </div>
+<section id="auth" class="card hidden">
+<h2 id="authTitle">NEXFIT'e Katıl</h2>
+<input id="fullName" placeholder="Ad Soyad">
+<input id="email" type="email" placeholder="E-posta adresi">
+<input id="password" type="password" placeholder="Şifre (en az 6 karakter)">
+<button onclick="signup()">Üye Ol</button>
+<button class="secondary" onclick="login()">Giriş Yap</button>
+<p id="authMessage"></p>
+</section>
 
-    <div class="forms">
-      <div class="panel">
-        <h3><span class="green">01.</span> Antrenman Ekle</h3>
-        <form id="workoutForm">
-          <label>Egzersiz adı</label>
-          <input id="exercise" placeholder="Örn. Bench Press" required>
-          <label>Set sayısı</label>
-          <input id="sets" type="number" min="1" value="3" required>
-          <label>Tekrar sayısı</label>
-          <input id="reps" type="number" min="1" value="12" required>
-          <label>Ağırlık (kg)</label>
-          <input id="weight" type="number" min="0" step="0.5" value="0">
-          <button class="primary" type="submit">Antrenmanı Kaydet</button>
-          <div class="message" id="workoutMessage"></div>
-        </form>
-      </div>
+<section id="dashboard" class="hidden">
+<h2>Hoş geldin, <span id="userName" style="color:var(--green)"></span></h2>
+<button class="secondary" onclick="logout()">Çıkış Yap</button>
 
-      <div class="panel">
-        <h3><span class="green">02.</span> Beslenme Ekle</h3>
-        <form id="foodForm">
-          <label>Yiyecek adı</label>
-          <input id="food" placeholder="Örn. Tavuk ve pilav" required>
-          <label>Kalori (kcal)</label>
-          <input id="calories" type="number" min="0" value="0" required>
-          <label>Protein (gram)</label>
-          <input id="protein" type="number" min="0" step="0.1" value="0">
-          <label>Karbonhidrat (gram)</label>
-          <input id="carbs" type="number" min="0" step="0.1" value="0">
-          <label>Yağ (gram)</label>
-          <input id="fat" type="number" min="0" step="0.1" value="0">
-          <button class="primary" type="submit">Beslenmeyi Kaydet</button>
-          <div class="message" id="foodMessage"></div>
-        </form>
-      </div>
-    </div>
+<nav>
+<button onclick="showTab('workout')">Antrenman</button>
+<button onclick="showTab('nutrition')">Beslenme</button>
+<button onclick="showTab('records')">Kayıtlarım</button>
+</nav>
 
-    <section>
-      <h2><span class="green">03.</span> Antrenman Geçmişim</h2>
-      <div class="panel" id="workoutList">Henüz kayıt yok.</div>
-    </section>
+<div id="workout" class="card">
+<h2>🏋️ Antrenman Kaydet</h2>
+<input id="exercise" placeholder="Egzersiz (Örn: Bench Press)">
+<div class="grid">
+<div><small>Set</small><input id="sets" type="number" placeholder="3"></div>
+<div><small>Tekrar</small><input id="reps" type="number" placeholder="12"></div>
+<div><small>Ağırlık (kg)</small><input id="weight" type="number" placeholder="40"></div>
+</div>
+<button onclick="saveWorkout()">Antrenmanı Kaydet</button>
+</div>
 
-    <section>
-      <h2><span class="green">04.</span> Beslenme Geçmişim</h2>
-      <div class="panel" id="foodList">Henüz kayıt yok.</div>
-    </section>
-  </section>
+<div id="nutrition" class="card hidden">
+<h2>🥗 Beslenme Kaydet</h2>
+<input id="food" placeholder="Yiyecek (Örn: Tavuk ve pilav)">
+<div class="grid">
+<div><small>Kalori</small><input id="calories" type="number" placeholder="500"></div>
+<div><small>Protein (g)</small><input id="protein" type="number" placeholder="35"></div>
+<div><small>Karbonhidrat (g)</small><input id="carbs" type="number" placeholder="60"></div>
+<div><small>Yağ (g)</small><input id="fat" type="number" placeholder="12"></div>
+</div>
+<button onclick="saveNutrition()">Beslenmeyi Kaydet</button>
+</div>
+
+<div id="records" class="card hidden">
+<h2>📋 Kayıtlarım</h2>
+<button onclick="loadRecords()">Yenile</button>
+<div id="recordList"></div>
+</div>
+<p id="appMessage"></p>
+</section>
 </main>
 
-<footer>© 2026 NEXFIT. Tüm hakları saklıdır.</footer>
-
 <script>
-// NEXFIT SUPABASE BAĞLANTISI
 const SUPABASE_URL = "https://vsapoyznvmcwcbzxqnrx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_x6Gr3j9N4pyaglY-7pED4g_ObpFS8KK";
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentUser=null;
+let english=false;
 
-let authMode = "login";
-let currentUser = null;
+function showAuth(){
+ document.getElementById("auth").classList.remove("hidden");
+ document.getElementById("auth").scrollIntoView({behavior:"smooth"});
+}
+function showTab(tab){
+ ["workout","nutrition","records"].forEach(id=>document.getElementById(id).classList.toggle("hidden",id!==tab));
+}
+function message(id,text){document.getElementById(id).textContent=text;}
 
-function showHome(){
-  document.getElementById("home").classList.remove("hidden");
-  document.getElementById("authArea").classList.add("hidden");
-  document.getElementById("dashboard").classList.add("hidden");
+async function signup(){
+ const full_name=document.getElementById("fullName").value.trim();
+ const email=document.getElementById("email").value.trim();
+ const password=document.getElementById("password").value;
+ if(!full_name||!email||password.length<6){message("authMessage","Ad, e-posta ve en az 6 karakterli şifre gerekli.");return;}
+ const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name}}});
+ if(error){message("authMessage",error.message);return;}
+ if(data.session){currentUser=data.user;openDashboard();}
+ else{message("authMessage","Kayıt alındı. E-posta doğrulaması açıksa gelen kutunu kontrol et.");}
 }
 
-function showAuth(mode){
-  authMode = mode;
-  document.getElementById("home").classList.add("hidden");
-  document.getElementById("dashboard").classList.add("hidden");
-  document.getElementById("authArea").classList.remove("hidden");
-  document.getElementById("authTitle").textContent = mode==="login"?"NEXFIT'e Giriş Yap":"Ücretsiz Üye Ol";
-  document.getElementById("authDescription").textContent = mode==="login"?"Hesabına giriş yap.":"NEXFIT ailesine katıl.";
-  document.getElementById("nameField").classList.toggle("hidden",mode==="login");
-  document.getElementById("authSubmit").textContent = mode==="login"?"Giriş Yap":"Hesap Oluştur";
-  document.getElementById("authMessage").textContent = "";
+async function login(){
+ const email=document.getElementById("email").value.trim();
+ const password=document.getElementById("password").value;
+ const {data,error}=await db.auth.signInWithPassword({email,password});
+ if(error){message("authMessage",error.message);return;}
+ currentUser=data.user;openDashboard();
 }
 
-function switchAuth(){
-  showAuth(authMode==="login"?"signup":"login");
+function openDashboard(){
+ document.getElementById("home").classList.add("hidden");
+ document.getElementById("features").classList.add("hidden");
+ document.getElementById("auth").classList.add("hidden");
+ document.getElementById("dashboard").classList.remove("hidden");
+ document.getElementById("userName").textContent=currentUser.user_metadata?.full_name||currentUser.email;
+ loadRecords();
 }
-
-document.getElementById("authForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const message=document.getElementById("authMessage");
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value;
-  message.textContent="İşlem yapılıyor...";
-
-  try{
-    if(authMode==="signup"){
-      const fullName=document.getElementById("fullName").value.trim();
-      if(!fullName){message.textContent="Lütfen adını yaz.";return;}
-      const {data,error}=await db.auth.signUp({
-        email,password,
-        options:{data:{full_name:fullName}}
-      });
-      if(error) throw error;
-      if(data.session){
-        message.textContent="Hesabın oluşturuldu!";
-        await checkSession();
-      }else{
-        message.textContent="Kayıt alındı. E-posta doğrulaması açıksa gelen kutunu kontrol et.";
-      }
-    }else{
-      const {error}=await db.auth.signInWithPassword({email,password});
-      if(error) throw error;
-      await checkSession();
-    }
-  }catch(err){
-    message.textContent="Hata: "+err.message;
-  }
-});
 
 async function logout(){
-  await db.auth.signOut();
-  currentUser=null;
-  document.getElementById("logoutNav").classList.add("hidden");
-  document.getElementById("loginNav").classList.remove("hidden");
-  document.getElementById("signupNav").classList.remove("hidden");
-  showHome();
+ await db.auth.signOut();
+ currentUser=null;
+ document.getElementById("dashboard").classList.add("hidden");
+ document.getElementById("home").classList.remove("hidden");
+ document.getElementById("features").classList.remove("hidden");
 }
 
-async function checkSession(){
-  const {data}=await db.auth.getSession();
-  currentUser=data.session?.user||null;
-  if(currentUser){
-    document.getElementById("home").classList.add("hidden");
-    document.getElementById("authArea").classList.add("hidden");
-    document.getElementById("dashboard").classList.remove("hidden");
-    document.getElementById("loginNav").classList.add("hidden");
-    document.getElementById("signupNav").classList.add("hidden");
-    document.getElementById("logoutNav").classList.remove("hidden");
-    const name=currentUser.user_metadata?.full_name||currentUser.email.split("@")[0];
-    document.getElementById("userName").textContent=name.toLocaleUpperCase("tr-TR");
-    await loadData();
-  }
+async function saveWorkout(){
+ const exercise_name=document.getElementById("exercise").value.trim();
+ if(!exercise_name){message("appMessage","Egzersiz adını yaz.");return;}
+ const {error}=await db.from("workouts").insert({
+ user_id:currentUser.id,exercise_name,
+ sets:Number(document.getElementById("sets").value)||0,
+ reps:Number(document.getElementById("reps").value)||0,
+ weight:Number(document.getElementById("weight").value)||0
+ });
+ message("appMessage",error?error.message:"Antrenman kaydedildi!");
+ if(!error)loadRecords();
 }
 
-async function loadData(){
-  if(!currentUser)return;
-  const {data:workouts,error:wError}=await db.from("workouts").select("*").order("created_at",{ascending:false});
-  const {data:foods,error:fError}=await db.from("nutrition_logs").select("*").order("created_at",{ascending:false});
-  if(wError||fError){
-    alert("Kayıtlar alınamadı: "+(wError?.message||fError?.message));
-    return;
-  }
-  document.getElementById("workoutCount").textContent=workouts.length;
-  document.getElementById("foodCount").textContent=foods.length;
-  const today=new Date().toLocaleDateString("en-CA");
-  const todayCalories=foods.filter(x=>x.meal_date===today).reduce((sum,x)=>sum+Number(x.calories||0),0);
-  document.getElementById("calorieCount").textContent=todayCalories;
-  document.getElementById("workoutList").innerHTML=workouts.length?workouts.map(x=>`
-    <div class="record">
-      <div><b>${safe(x.exercise_name)}</b><small>${x.sets} set × ${x.reps} tekrar · ${x.weight} kg · ${x.workout_date}</small></div>
-      <button class="delete" onclick="deleteRecord('workouts',${x.id})">Sil</button>
-    </div>`).join(""):"Henüz antrenman kaydı yok.";
-  document.getElementById("foodList").innerHTML=foods.length?foods.map(x=>`
-    <div class="record">
-      <div><b>${safe(x.food_name)}</b><small>${x.calories} kcal · Protein ${x.protein} g · Karbonhidrat ${x.carbohydrates} g · Yağ ${x.fat} g</small></div>
-      <button class="delete" onclick="deleteRecord('nutrition_logs',${x.id})">Sil</button>
-    </div>`).join(""):"Henüz beslenme kaydı yok.";
+async function saveNutrition(){
+ const food_name=document.getElementById("food").value.trim();
+ if(!food_name){message("appMessage","Yiyecek adını yaz.");return;}
+ const {error}=await db.from("nutrition_logs").insert({
+ user_id:currentUser.id,food_name,
+ calories:Number(document.getElementById("calories").value)||0,
+ protein:Number(document.getElementById("protein").value)||0,
+ carbohydrates:Number(document.getElementById("carbs").value)||0,
+ fat:Number(document.getElementById("fat").value)||0
+ });
+ message("appMessage",error?error.message:"Beslenme kaydedildi!");
+ if(!error)loadRecords();
 }
 
-function safe(value){
-  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function loadRecords(){
+ if(!currentUser)return;
+ const list=document.getElementById("recordList");
+ list.textContent="Yükleniyor...";
+ const [w,n]=await Promise.all([
+ db.from("workouts").select("*").eq("user_id",currentUser.id).order("created_at",{ascending:false}),
+ db.from("nutrition_logs").select("*").eq("user_id",currentUser.id).order("created_at",{ascending:false})
+ ]);
+ if(w.error||n.error){list.textContent=(w.error||n.error).message;return;}
+ list.innerHTML="";
+ w.data.forEach(x=>{
+ const d=document.createElement("div");d.className="card";
+ d.textContent=`🏋️ ${x.exercise_name} — ${x.sets} set × ${x.reps} tekrar — ${x.weight} kg`;
+ list.appendChild(d);
+ });
+ n.data.forEach(x=>{
+ const d=document.createElement("div");d.className="card";
+ d.textContent=`🥗 ${x.food_name} — ${x.calories} kcal | Protein ${x.protein}g`;
+ list.appendChild(d);
+ });
+ if(!list.children.length)list.textContent="Henüz kayıt yok.";
 }
 
-document.getElementById("workoutForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const message=document.getElementById("workoutMessage");
-  const {error}=await db.from("workouts").insert({
-    user_id:currentUser.id,
-    exercise_name:document.getElementById("exercise").value.trim(),
-    sets:Number(document.getElementById("sets").value),
-    reps:Number(document.getElementById("reps").value),
-    weight:Number(document.getElementById("weight").value)
-  });
-  if(error){message.textContent="Hata: "+error.message;return;}
-  e.target.reset();
-  message.textContent="Antrenman kaydedildi!";
-  await loadData();
-});
-
-document.getElementById("foodForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const message=document.getElementById("foodMessage");
-  const {error}=await db.from("nutrition_logs").insert({
-    user_id:currentUser.id,
-    food_name:document.getElementById("food").value.trim(),
-    calories:Number(document.getElementById("calories").value),
-    protein:Number(document.getElementById("protein").value),
-    carbohydrates:Number(document.getElementById("carbs").value),
-    fat:Number(document.getElementById("fat").value)
-  });
-  if(error){message.textContent="Hata: "+error.message;return;}
-  e.target.reset();
-  message.textContent="Beslenme kaydedildi!";
-  await loadData();
-});
-
-async function deleteRecord(table,id){
-  if(!confirm("Bu kaydı silmek istiyor musun?"))return;
-  const {error}=await db.from(table).delete().eq("id",id);
-  if(error){alert("Silinemedi: "+error.message);return;}
-  await loadData();
+function changeLang(){
+ english=!english;
+ document.getElementById("langBtn").textContent=english?"TR":"EN";
+ document.querySelector(".hero h1").innerHTML=english?'BUILD YOUR <span>BEST</span> SELF.':'BUILD YOUR <span>BEST</span> SELF.';
+ document.querySelector(".hero p:nth-of-type(1)").textContent=english?"DISCOVER YOUR POWER. BREAK YOUR LIMITS.":"GÜCÜNÜ KEŞFET. SINIRLARINI AŞ.";
 }
-
-db.auth.onAuthStateChange((event,session)=>{
-  currentUser=session?.user||null;
-  if(event==="SIGNED_IN") checkSession();
-  if(event==="SIGNED_OUT") showHome();
-});
-
-checkSession();
+(async()=>{
+ const {data}=await db.auth.getSession();
+ if(data.session){currentUser=data.session.user;openDashboard();}
+})();
 </script>
 </body>
 </html>
