@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -63,6 +62,19 @@ h3{font-size:15px;margin:0 0 9px}
 .day b{display:block;font-size:15px;color:white;margin-bottom:8px}
 .day.done{border:1px solid #80b92c;color:var(--green)}
 .record{background:#1a211b;padding:14px;border-radius:8px;margin:9px 0;font-size:13px}
+.foodresults{margin-top:8px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#0c110d;max-height:320px;overflow-y:auto}
+.foodresult{display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:13px;background:transparent;border:0;border-bottom:1px solid #263027;color:var(--text)}
+.foodresult:last-child{border-bottom:0}
+.foodresult:hover{background:#1b2618}
+.foodresult small{display:block;color:var(--muted);margin-top:4px}
+.foodpreview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.macro{background:#1a211b;border:1px solid var(--line);border-radius:9px;padding:12px}
+.macro b{display:block;font-size:20px;color:var(--green);margin-bottom:4px}
+.macro small{font-size:10px;color:var(--muted)}
+.selectedfood{padding:12px;background:#1b2618;border:1px solid #48652b;border-radius:9px;margin-top:12px}
+.selectedfood strong{color:var(--green)}
+.foodhint{font-size:12px;color:var(--muted);margin-top:8px}
+@media(max-width:600px){.foodpreview{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .record small{display:block;color:var(--muted);margin-top:6px}
 .formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 section.page{min-width:0}
@@ -197,18 +209,27 @@ section.page{min-width:0}
    <div class="card">
     <div class="eyebrow">NUTRITION CENTER</div>
     <h1>Beslenme <span class="green">Takibi</span></h1>
-    <p class="muted">Öğünlerini ve makro değerlerini takip et.</p>
+    <p class="muted">Yemek, içecek, kuruyemiş, tatlı, meyve ve sebzelerini ara; miktarı girince değerler otomatik hesaplansın.</p>
    </div>
    <div class="card" style="margin-top:16px">
-    <h2>Yeni Öğün Ekle</h2>
-    <label>Yiyecek / Öğün adı</label><input id="food" placeholder="Örn: Tavuk, pilav ve salata">
-    <div class="formgrid">
-     <div><label>Kalori (kcal)</label><input id="calories" type="number" placeholder="500"></div>
-     <div><label>Protein (g)</label><input id="protein" type="number" placeholder="35"></div>
-     <div><label>Karbonhidrat (g)</label><input id="carbs" type="number" placeholder="60"></div>
-     <div><label>Yağ (g)</label><input id="fat" type="number" placeholder="12"></div>
+    <h2>Besin Ara ve Öğün Ekle</h2>
+    <label>Besin adı</label>
+    <input id="foodSearch" type="search" placeholder="Örn: pi, tavuk, ceviz, ayran..." autocomplete="off" oninput="searchFoods()">
+    <div id="foodResults" class="foodresults hidden"></div>
+    <div id="foodHint" class="foodhint">Arama yapmak için en az 2 harf yaz.</div>
+    <div id="selectedFoodBox" class="selectedfood hidden"></div>
+    <div class="formgrid" style="margin-top:12px">
+     <div><label id="amountLabel">Miktar (gram)</label><input id="foodAmount" type="number" min="0.1" step="0.1" value="100" oninput="updateFoodPreview()"></div>
+     <div><label>Ölçü birimi</label><input id="foodUnit" value="g" readonly></div>
     </div>
-    <button class="btn" onclick="saveNutrition()">＋ ÖĞÜNÜ KAYDET</button>
+    <div class="foodpreview">
+     <div class="macro"><b id="previewCalories">0</b><small>Kalori (kcal)</small></div>
+     <div class="macro"><b id="previewProtein">0 g</b><small>Protein</small></div>
+     <div class="macro"><b id="previewCarbs">0 g</b><small>Karbonhidrat</small></div>
+     <div class="macro"><b id="previewFat">0 g</b><small>Yağ</small></div>
+    </div>
+    <button class="btn" id="saveFoodButton" onclick="saveNutrition()" disabled>＋ ÖĞÜNÜ KAYDET</button>
+    <p class="foodhint">Değerler seçilen besinin 100 g / 100 ml referansına göre hesaplanır. Tarif ve marka farklılıkları olabilir.</p>
    </div>
   </section>
 
@@ -232,11 +253,18 @@ const db=window.supabase.createClient(
  "https://vsapoyznvmcwcbzxqnrx.supabase.co",
  "sb_publishable_x6Gr3j9N4pyaglY-7pED4g_ObpFS8KK"
 );
+
 let user=null;
 let mode="login";
+let foodCatalog=[];
+let selectedFood=null;
+let foodCatalogLoaded=false;
+let foodSearchTimer=null;
+
 const $=id=>document.getElementById(id);
 const localDate=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const today=localDate();
+
 $("today").textContent=new Date().toLocaleDateString("tr-TR",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
 $("workoutDate").value=today;
 
@@ -249,33 +277,53 @@ function setMode(next){
  $("password").autocomplete=mode==="login"?"current-password":"new-password";
  $("authMessage").textContent="";
 }
+
 function authMsg(t){$("authMessage").textContent=t}
 function say(t){$("message").textContent=t}
 
 async function submitAuth(){
  const email=$("email").value.trim();
  const password=$("password").value;
+
  if(!email||!password){authMsg("E-posta ve şifreni gir.");return}
+
  if(mode==="signup"){
   const name=$("fullName").value.trim();
+
   if(!name){authMsg("Lütfen ad soyad alanını doldur.");return}
   if(password.length<6){authMsg("Şifre en az 6 karakter olmalı.");return}
-  const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name:name}}});
+
+  const {data,error}=await db.auth.signUp({
+   email,
+   password,
+   options:{data:{full_name:name}}
+  });
+
   if(error){authMsg(error.message);return}
-  if(data.session){user=data.user;openApp()}
-  else{authMsg("Kayıt oluşturuldu. Şimdi Giriş Yap sekmesinden hesabına girebilirsin.")}
+
+  if(data.session){
+   user=data.user;
+   openApp();
+  }else{
+   authMsg("Kayıt oluşturuldu. Şimdi Giriş Yap sekmesinden hesabına girebilirsin.");
+  }
  }else{
   const {data,error}=await db.auth.signInWithPassword({email,password});
+
   if(error){authMsg(error.message);return}
-  user=data.user;openApp();
+
+  user=data.user;
+  openApp();
  }
 }
+
 function openApp(){
  $("authScreen").classList.add("hidden");
  $("app").classList.remove("hidden");
  $("welcome").textContent="Merhaba, "+(user.user_metadata?.full_name||"NEXFIT üyesi");
  loadData();
 }
+
 async function logout(){
  await db.auth.signOut();
  user=null;
@@ -285,88 +333,359 @@ async function logout(){
  $("password").value="";
  setMode("login");
 }
+
 function tab(id,btn){
  ["dashboard","workout","nutrition","history"].forEach(x=>$(x).classList.toggle("hidden",x!==id));
+
  document.querySelectorAll(".navbtn").forEach(x=>x.classList.remove("active"));
+
  if(btn)btn.classList.add("active");
- $("welcome").textContent={dashboard:"Genel Bakış",workout:"Antrenman Merkezi",nutrition:"Beslenme Merkezi",history:"Kayıtlarım"}[id];
+
+ $("welcome").textContent={
+  dashboard:"Genel Bakış",
+  workout:"Antrenman Merkezi",
+  nutrition:"Beslenme Merkezi",
+  history:"Kayıtlarım"
+ }[id];
+
  if(id==="dashboard"||id==="history")loadData();
+ if(id==="nutrition")loadFoodCatalog();
 }
+
 function addRecord(parent,title,desc){
- const d=document.createElement("div");d.className="record";
- const b=document.createElement("b");b.textContent=title;
- const p=document.createElement("small");p.textContent=desc;
- d.append(b,p);parent.append(d);
+ const d=document.createElement("div");
+ d.className="record";
+
+ const b=document.createElement("b");
+ b.textContent=title;
+
+ const p=document.createElement("small");
+ p.textContent=desc;
+
+ d.append(b,p);
+ parent.append(d);
 }
+
 async function saveWorkout(){
  const name=$("exercise").value.trim();
+
  if(!name){say("Egzersiz adını gir.");return}
+
  const {error}=await db.from("workouts").insert({
-  user_id:user.id,exercise_name:name,
+  user_id:user.id,
+  exercise_name:name,
   sets:Number($("sets").value)||0,
   reps:Number($("reps").value)||0,
   weight:Number($("weight").value)||0,
   workout_date:$("workoutDate").value||today
  });
+
  say(error?error.message:"Antrenman başarıyla kaydedildi.");
- if(!error){$("exercise").value="";await loadData()}
+
+ if(!error){
+  $("exercise").value="";
+  await loadData();
+ }
 }
+
+function normalizeFoodText(value){
+ return String(value||"").toLocaleLowerCase("tr-TR")
+  .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+  .replace(/ı/g,"i").trim();
+}
+
+async function loadFoodCatalog(){
+ if(foodCatalogLoaded)return;
+
+ $("foodHint").textContent="Besin kütüphanesi yükleniyor...";
+
+ const {data,error}=await db.from("food_catalog")
+  .select("id,name,aliases,calories,protein,carbohydrates,fat,category,base_unit")
+  .order("name",{ascending:true}).limit(1000);
+
+ if(error){
+  $("foodHint").textContent="Besin listesi yüklenemedi: "+error.message;
+  return;
+ }
+
+ foodCatalog=data||[];
+ foodCatalogLoaded=true;
+
+ $("foodHint").textContent=`${foodCatalog.length} besin yüklendi. Aramak için en az 2 harf yaz.`;
+}
+
+function searchFoods(){
+ clearTimeout(foodSearchTimer);
+
+ selectedFood=null;
+ $("selectedFoodBox").classList.add("hidden");
+ $("saveFoodButton").disabled=true;
+ updateFoodPreview();
+
+ const query=normalizeFoodText($("foodSearch").value);
+ const results=$("foodResults");
+
+ results.replaceChildren();
+
+ if(query.length<2){
+  results.classList.add("hidden");
+  $("foodHint").textContent="Arama yapmak için en az 2 harf yaz.";
+  return;
+ }
+
+ foodSearchTimer=setTimeout(async()=>{
+  await loadFoodCatalog();
+
+  if(!foodCatalogLoaded)return;
+
+  const matches=foodCatalog.map(food=>{
+   const name=normalizeFoodText(food.name);
+   const aliases=(food.aliases||[]).map(normalizeFoodText);
+
+   const score=name.startsWith(query)?0:
+    aliases.some(a=>a.startsWith(query))?1:
+    name.includes(query)?2:
+    aliases.some(a=>a.includes(query))?3:99;
+
+   return {food,score};
+  })
+  .filter(x=>x.score<99)
+  .sort((a,b)=>a.score-b.score||a.food.name.localeCompare(b.food.name,"tr"));
+
+  results.replaceChildren();
+
+  matches.slice(0,20).forEach(({food})=>{
+   const button=document.createElement("button");
+   button.type="button";
+   button.className="foodresult";
+
+   const left=document.createElement("span");
+
+   const name=document.createElement("strong");
+   name.textContent=food.name;
+
+   const meta=document.createElement("small");
+   meta.textContent=(food.category||"Besin")+" · 100 "+(food.base_unit||"g");
+
+   left.append(name,meta);
+
+   const right=document.createElement("strong");
+   right.textContent=Number(food.calories).toLocaleString("tr-TR")+" kcal";
+
+   button.append(left,right);
+   button.onclick=()=>selectFood(food);
+
+   results.append(button);
+  });
+
+  results.classList.toggle("hidden",matches.length===0);
+
+  $("foodHint").textContent=matches.length?
+   `${matches.length} eşleşme bulundu. Bir besin seç.`:
+   "Bu isimde besin bulunamadı. Daha kısa veya farklı bir kelime dene.";
+
+ },180);
+}
+
+function selectFood(food){
+ selectedFood=food;
+
+ $("foodSearch").value=food.name;
+ $("foodResults").classList.add("hidden");
+ $("selectedFoodBox").classList.remove("hidden");
+ $("selectedFoodBox").replaceChildren();
+
+ const title=document.createElement("strong");
+ title.textContent=food.name;
+
+ const detail=document.createElement("div");
+ detail.className="foodhint";
+ detail.textContent=`${food.category||"Besin"} · 100 ${food.base_unit||"g"}: ${food.calories} kcal`;
+
+ $("selectedFoodBox").append(title,detail);
+
+ const unit=food.base_unit||"g";
+
+ $("foodUnit").value=unit;
+ $("amountLabel").textContent=unit==="ml"?"Miktar (mililitre)":"Miktar (gram)";
+ $("foodAmount").value=100;
+ $("saveFoodButton").disabled=false;
+
+ $("foodHint").textContent="Miktarı değiştir; besin değerleri otomatik hesaplanacak.";
+
+ updateFoodPreview();
+}
+
+function getFoodValues(){
+ if(!selectedFood)return null;
+
+ const amount=Number($("foodAmount").value);
+
+ if(!Number.isFinite(amount)||amount<=0)return null;
+
+ const factor=amount/100;
+
+ return {
+  calories:Math.round(Number(selectedFood.calories||0)*factor),
+  protein:Number((Number(selectedFood.protein||0)*factor).toFixed(1)),
+  carbohydrates:Number((Number(selectedFood.carbohydrates||0)*factor).toFixed(1)),
+  fat:Number((Number(selectedFood.fat||0)*factor).toFixed(1))
+ };
+}
+
+function updateFoodPreview(){
+ const values=getFoodValues();
+
+ $("previewCalories").textContent=values?values.calories.toLocaleString("tr-TR"):"0";
+ $("previewProtein").textContent=(values?values.protein:0)+" g";
+ $("previewCarbs").textContent=(values?values.carbohydrates:0)+" g";
+ $("previewFat").textContent=(values?values.fat:0)+" g";
+
+ $("saveFoodButton").disabled=!selectedFood||!values;
+}
+
 async function saveNutrition(){
- const name=$("food").value.trim();
- if(!name){say("Yiyecek adını gir.");return}
+ if(!selectedFood){
+  say("Önce listeden bir besin seç.");
+  return;
+ }
+
+ const amount=Number($("foodAmount").value);
+ const values=getFoodValues();
+
+ if(!values){
+  say("Geçerli bir gram veya mililitre miktarı gir.");
+  return;
+ }
+
+ const unit=selectedFood.base_unit||"g";
+ const name=`${selectedFood.name} (${amount} ${unit})`;
+
+ $("saveFoodButton").disabled=true;
+
  const {error}=await db.from("nutrition_logs").insert({
-  user_id:user.id,food_name:name,
-  calories:Number($("calories").value)||0,
-  protein:Number($("protein").value)||0,
-  carbohydrates:Number($("carbs").value)||0,
-  fat:Number($("fat").value)||0,
+  user_id:user.id,
+  food_name:name,
+  calories:values.calories,
+  protein:values.protein,
+  carbohydrates:values.carbohydrates,
+  fat:values.fat,
   meal_date:today
  });
- say(error?error.message:"Beslenme kaydı başarıyla eklendi.");
- if(!error){$("food").value="";await loadData()}
+
+ $("saveFoodButton").disabled=false;
+
+ say(error?error.message:"Besin ve hesaplanan değerleri başarıyla kaydedildi.");
+
+ if(!error){
+  selectedFood=null;
+
+  $("foodSearch").value="";
+  $("foodAmount").value=100;
+  $("foodUnit").value="g";
+  $("amountLabel").textContent="Miktar (gram)";
+  $("selectedFoodBox").classList.add("hidden");
+  $("foodResults").classList.add("hidden");
+  $("foodHint").textContent="Yeni bir besin arayabilirsin.";
+
+  updateFoodPreview();
+  await loadData();
+ }
 }
+
 async function loadData(){
  if(!user)return;
+
  const [w,n]=await Promise.all([
   db.from("workouts").select("*").eq("user_id",user.id).order("created_at",{ascending:false}),
   db.from("nutrition_logs").select("*").eq("user_id",user.id).order("created_at",{ascending:false})
  ]);
- if(w.error||n.error){say((w.error||n.error).message);return}
- const workouts=w.data||[],foods=n.data||[];
+
+ if(w.error||n.error){
+  say((w.error||n.error).message);
+  return;
+ }
+
+ const workouts=w.data||[];
+ const foods=n.data||[];
+
  const todays=foods.filter(x=>x.meal_date===today);
  const todayW=workouts.filter(x=>x.workout_date===today);
+
  const calories=todays.reduce((s,x)=>s+(Number(x.calories)||0),0);
  const protein=todays.reduce((s,x)=>s+(Number(x.protein)||0),0);
+
  $("calStat").textContent=calories.toLocaleString("tr-TR");
  $("proteinStat").textContent=protein+" g";
  $("workoutStat").textContent=todayW.length;
  $("totalStat").textContent=workouts.length+foods.length;
  $("calBig").textContent=calories.toLocaleString("tr-TR")+" kcal";
  $("calBar").style.width=Math.min(100,calories/25)+"%";
+
  $("recent").replaceChildren();
- [...workouts.slice(0,4).map(x=>({title:"🏋️ "+x.exercise_name,desc:`${x.sets} set × ${x.reps} tekrar · ${x.weight} kg · ${x.workout_date}`})),
- ...foods.slice(0,4).map(x=>({title:"🥗 "+x.food_name,desc:`${x.calories} kcal · Protein ${x.protein} g · ${x.meal_date}`}))]
- .slice(0,5).forEach(x=>addRecord($("recent"),x.title,x.desc));
- if(!$("recent").children.length)$("recent").textContent="Henüz aktivite yok. İlk kaydını ekle!";
+
+ [
+  ...workouts.slice(0,4).map(x=>({
+   title:"🏋️ "+x.exercise_name,
+   desc:`${x.sets} set × ${x.reps} tekrar · ${x.weight} kg · ${x.workout_date}`
+  })),
+  ...foods.slice(0,4).map(x=>({
+   title:"🥗 "+x.food_name,
+   desc:`${x.calories} kcal · Protein ${x.protein} g · ${x.meal_date}`
+  }))
+ ]
+ .slice(0,5)
+ .forEach(x=>addRecord($("recent"),x.title,x.desc));
+
+ if(!$("recent").children.length){
+  $("recent").textContent="Henüz aktivite yok. İlk kaydını ekle!";
+ }
+
  $("workoutList").replaceChildren();
  $("nutritionList").replaceChildren();
- workouts.forEach(x=>addRecord($("workoutList"),x.exercise_name,`${x.sets} set × ${x.reps} tekrar · ${x.weight} kg · ${x.workout_date}`));
- foods.forEach(x=>addRecord($("nutritionList"),x.food_name,`${x.calories} kcal · Protein ${x.protein} g · ${x.meal_date}`));
+
+ workouts.forEach(x=>addRecord(
+  $("workoutList"),
+  x.exercise_name,
+  `${x.sets} set × ${x.reps} tekrar · ${x.weight} kg · ${x.workout_date}`
+ ));
+
+ foods.forEach(x=>addRecord(
+  $("nutritionList"),
+  x.food_name,
+  `${x.calories} kcal · Protein ${x.protein} g · ${x.meal_date}`
+ ));
+
  if(!workouts.length)$("workoutList").textContent="Henüz antrenman yok.";
  if(!foods.length)$("nutritionList").textContent="Henüz öğün yok.";
- const week=$("week");week.replaceChildren();
+
+ const week=$("week");
+ week.replaceChildren();
+
  for(let i=6;i>=0;i--){
-  const d=new Date();d.setDate(d.getDate()-i);
+  const d=new Date();
+  d.setDate(d.getDate()-i);
+
   const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-  const el=document.createElement("div");el.className="day"+(workouts.some(x=>x.workout_date===key)?" done":"");
-  const b=document.createElement("b");b.textContent=d.getDate();
+
+  const el=document.createElement("div");
+  el.className="day"+(workouts.some(x=>x.workout_date===key)?" done":"");
+
+  const b=document.createElement("b");
+  b.textContent=d.getDate();
+
   el.append(b,document.createTextNode(d.toLocaleDateString("tr-TR",{weekday:"short"})));
   week.append(el);
  }
 }
+
 (async()=>{
  const {data}=await db.auth.getSession();
- if(data.session){user=data.session.user;openApp()}
+
+ if(data.session){
+  user=data.session.user;
+  openApp();
+ }
 })();
 </script>
 </body>
