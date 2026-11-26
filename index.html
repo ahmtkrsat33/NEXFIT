@@ -75,7 +75,7 @@ h3{font-size:15px;margin:0 0 9px}
 .day{background:#1b211c;border-radius:8px;text-align:center;padding:12px 2px;font-size:11px;color:#9aa49a}
 .day b{display:block;font-size:15px;color:white;margin-bottom:8px}
 .day.done{border:1px solid #80b92c;color:var(--green)}
-.record{background:#1a211b;padding:14px;border-radius:8px;margin:9px 0;font-size:13px}
+.record-with-delete{display:flex;align-items:center;justify-content:space-between;gap:12px}.record-info{display:flex;flex-direction:column;gap:5px;min-width:0}.record-info small{overflow-wrap:anywhere}.record-delete{flex-shrink:0;border:1px solid #623b3b;background:#241515;color:#ff8b8b;border-radius:9px;padding:8px 13px;font-weight:700}.record-delete:hover{background:#3a1c1c}.record-delete:disabled{opacity:.6;cursor:wait}.record{background:#1a211b;padding:14px;border-radius:8px;margin:9px 0;font-size:13px}
 .foodresults{margin-top:8px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#0c110d;max-height:320px;overflow-y:auto}
 .foodresult{display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:13px;background:transparent;border:0;border-bottom:1px solid #263027;color:var(--text)}
 .foodresult:last-child{border-bottom:0}.foodresult:hover{background:#1b2618}.foodresult small{display:block;color:var(--muted);margin-top:4px}
@@ -488,11 +488,23 @@ function tab(id,btn){
  if(id==="exercises")loadExercises();
  if(id==="wellness")loadWellness();
 }
-function addRecord(parent,title,desc){
- const d=document.createElement("div");d.className="record";
+function addRecord(parent,title,desc,table,id){
+ const d=document.createElement("div");d.className="record record-with-delete";
+ const info=document.createElement("div");info.className="record-info";
  const b=document.createElement("b");b.textContent=title;
  const p=document.createElement("small");p.textContent=desc;
- d.append(b,p);parent.append(d);
+ info.append(b,p);d.append(info);
+ if(table&&id!==undefined&&id!==null){const del=document.createElement("button");del.type="button";del.className="record-delete";del.textContent="Sil";del.title="Bu kaydı sil";del.onclick=()=>deleteSavedRecord(table,id,del);d.append(del)}
+ parent.append(d);
+}
+async function deleteSavedRecord(table,id,button){
+ if(!user||!["workouts","nutrition_logs"].includes(table))return;
+ const kind=table==="workouts"?"antrenman":"besin";
+ if(!confirm("Bu "+kind+" kaydını kalıcı olarak silmek istiyor musun?"))return;
+ button.disabled=true;button.textContent="Siliniyor…";
+ const {error}=await db.from(table).delete().eq("id",id).eq("user_id",user.id);
+ if(error){button.disabled=false;button.textContent="Sil";say("Kayıt silinemedi: "+error.message);return}
+ say("Kayıt silindi.");await loadData();
 }
 
 let selectedPlanDays=3;
@@ -907,8 +919,8 @@ async function loadData(){
  $("workoutList").replaceChildren();
  $("nutritionList").replaceChildren();
 
- workouts.forEach(x=>addRecord($("workoutList"),x.exercise_name,`${x.sets} set × ${x.reps} tekrar · ${x.weight} kg · ${x.workout_date}`));
- foods.forEach(x=>addRecord($("nutritionList"),x.food_name,`${x.calories} kcal · Protein ${x.protein} g · ${x.meal_date}`));
+ workouts.forEach(x=>addRecord($("workoutList"),x.exercise_name,`${x.sets} set × ${x.reps} tekrar · ${x.weight} kg · ${x.workout_date}`,"workouts",x.id));
+ foods.forEach(x=>addRecord($("nutritionList"),x.food_name,`${x.calories} kcal · Protein ${x.protein} g · ${x.meal_date}`,"nutrition_logs",x.id));
 
  if(!workouts.length)$("workoutList").textContent="Henüz antrenman yok.";
  if(!foods.length)$("nutritionList").textContent="Henüz öğün yok.";
