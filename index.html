@@ -428,7 +428,7 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
    </div>
    <div class="grid ai-layout">
     <div class="card"><div class="sectionhead"><h2>✦ Günlük koç analizi</h2><span class="ai-live">CANLI ANALİZ</span></div><div id="aiInsight" class="ai-insight">Kayıtların analiz ediliyor…</div><div id="aiRecommendations" class="ai-recommendations"></div></div>
-    <div class="card ai-chat-card"><div class="sectionhead"><div><span class="ai-kicker">NEXFIT INTELLIGENCE</span><h2 style="margin:5px 0 0">Koçuna sor</h2></div><span class="ai-live">● HAZIR</span></div><p class="ai-chat-intro">Hedefini, antrenmanını veya beslenmeni yaz. Kayıtlarına göre sana yol göstereyim.</p><div id="aiChat" class="ai-chat"><div class="ai-message ai-bot"><span class="ai-bot-label">NEXFIT KOÇ</span>Merhaba! Bugün hedefin için nasıl ilerleyebileceğini birlikte planlayalım. Aşağıdaki konulardan birini seçebilir veya doğrudan yazabilirsin.</div></div><div class="ai-prompt-label">HIZLI BAŞLANGIÇ</div><div class="ai-quick"><button type="button" onclick="askNexfitQuick('Kas kazanmak için bugün ne yapmalıyım?')">💪 Kas kazanımı</button><button type="button" onclick="askNexfitQuick('Bugünkü beslenmemi değerlendir')">🥗 Beslenme</button><button type="button" onclick="askNexfitQuick('Antrenman gelişimimi değerlendir')">📈 Gelişim</button><button type="button" onclick="askNexfitQuick('Dinlenme ve toparlanma öner')">🌙 Toparlanma</button></div><div class="ai-composer"><textarea id="aiQuestion" rows="1" maxlength="1200" aria-label="NEXFIT AI koçuna mesaj yaz" placeholder="Mesajını buraya yaz... (Enter ile gönder)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();askNexfitAI()}" oninput="resizeAiQuestion(this)"></textarea><button id="aiSendButton" class="ai-send" type="button" onclick="askNexfitAI()" aria-label="Mesajı gönder" title="Gönder">➤</button></div><div class="ai-composer-foot"><span>↵ Gönder</span><span>Shift + Enter: yeni satır</span><span id="aiCharCount">0 / 1200</span></div></div>
+    <div class="card ai-chat-card"><div class="sectionhead"><div><span class="ai-kicker">NEXFIT INTELLIGENCE</span><h2 style="margin:5px 0 0">Koçuna sor</h2></div><button type="button" class="btn dark" style="padding:8px 11px;font-size:12px" onclick="clearNexfitAIChat()">Sohbeti temizle</button></div><p class="ai-chat-intro">Hedefini, antrenmanını veya beslenmeni yaz. Kayıtlarına göre sana yol göstereyim.</p><div id="aiChat" class="ai-chat"><div class="ai-message ai-bot"><span class="ai-bot-label">NEXFIT KOÇ</span>Merhaba! Bugün hedefin için nasıl ilerleyebileceğini birlikte planlayalım. Aşağıdaki konulardan birini seçebilir veya doğrudan yazabilirsin.</div></div><div class="ai-prompt-label">HIZLI BAŞLANGIÇ</div><div class="ai-quick"><button type="button" onclick="askNexfitQuick('Kas kazanmak için bugün ne yapmalıyım?')">💪 Kas kazanımı</button><button type="button" onclick="askNexfitQuick('Bugünkü beslenmemi değerlendir')">🥗 Beslenme</button><button type="button" onclick="askNexfitQuick('Antrenman gelişimimi değerlendir')">📈 Gelişim</button><button type="button" onclick="askNexfitQuick('Dinlenme ve toparlanma öner')">🌙 Toparlanma</button></div><div class="ai-composer"><textarea id="aiQuestion" rows="1" maxlength="1200" aria-label="NEXFIT AI koçuna mesaj yaz" placeholder="Mesajını buraya yaz... (Enter ile gönder)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();askNexfitAI()}" oninput="resizeAiQuestion(this)"></textarea><button id="aiSendButton" class="ai-send" type="button" onclick="askNexfitAI()" aria-label="Mesajı gönder" title="Gönder">➤</button></div><div class="ai-composer-foot"><span>↵ Gönder</span><span>Shift + Enter: yeni satır</span><span id="aiCharCount">0 / 1200</span></div></div>
    </div>
    <p class="ai-disclaimer">Not: NEXFIT AI mevcut uygulama kayıtlarından kurallı analiz ve öneriler üretir; tıbbi teşhis veya profesyonel antrenör değerlendirmesinin yerine geçmez.</p>
   </section>
@@ -531,7 +531,8 @@ function openApp(){
  $("authScreen").classList.add("hidden");
  $("app").classList.remove("hidden");
  $("welcome").textContent="Merhaba, "+(user.user_metadata?.full_name||"NEXFIT üyesi");
- loadData();
+  restoreNexfitAIChat();
+  loadData();
 }
 async function logout(){
  await db.auth.signOut();
@@ -1169,13 +1170,32 @@ function nexfitAiReply(question){
  if(/dinlen|uyku|toparlan|ağrı|sakat/.test(q))return "Toparlanma için düzenli uyku, yeterli beslenme, sıvı ve kas grupları arasında uygun dinlenme planla. Keskin veya devam eden ağrıda antrenmanı durdurup sağlık uzmanına danış. Ağrıya rağmen yük artırma.";
  return "Sana yardımcı olayım. Şu an "+recent.length+" son antrenman kaydını ve bugünkü "+Math.round(cal)+" kcal / "+Math.round(protein)+" g protein kaydını görüyorum. Bana hedefini biraz daha net sorabilirsin: kas kazanımı, yağ kaybı, beslenme, program veya toparlanma.";
 }
+function nexfitAIChatKey(){return "nexfit_ai_chat_v1_"+(user?.id||"guest")}
+function saveNexfitAIChat(){
+ try{const chat=$("aiChat");if(!chat)return;const messages=[...chat.querySelectorAll(".ai-message")].map(el=>({role:el.classList.contains("ai-user")?"user":"assistant",text:el.innerText.replace(/^NEXFIT KOÇ\\s*/,"").trim()})).filter(x=>x.text).slice(-60);localStorage.setItem(nexfitAIChatKey(),JSON.stringify(messages))}catch(error){console.warn("NEXFIT chat history could not be saved",error)}
+}
+function restoreNexfitAIChat(){
+ const chat=$("aiChat");if(!chat)return;
+ try{const rows=JSON.parse(localStorage.getItem(nexfitAIChatKey())||"[]");if(!Array.isArray(rows)||!rows.length)return;chat.replaceChildren();rows.slice(-60).forEach(row=>appendNexfitAIMessage(row.role==="user"?"user":"assistant",String(row.text||"")))}catch(error){console.warn("NEXFIT chat history could not be restored",error)}
+}
+function appendNexfitAIMessage(role,message){
+ const chat=$("aiChat"),el=document.createElement("div");el.className="ai-message "+(role==="user"?"ai-user":"ai-bot");
+ if(role!=="user"){const label=document.createElement("span");label.className="ai-bot-label";label.textContent="NEXFIT KOÇ";el.append(label)}
+ el.append(document.createTextNode(String(message||"")));chat.append(el);chat.scrollTop=chat.scrollHeight;return el;
+}
+function clearNexfitAIChat(){
+ if(!confirm("Bu cihazdaki NEXFIT koç sohbet geçmişi temizlensin mi?"))return;
+ try{localStorage.removeItem(nexfitAIChatKey())}catch(e){}
+ const chat=$("aiChat");chat.replaceChildren();appendNexfitAIMessage("assistant","Sohbet geçmişin temizlendi. Yeni bir soru sorabilirsin.");saveNexfitAIChat();
+}
 function resizeAiQuestion(input){input.style.height="auto";input.style.height=Math.min(input.scrollHeight,130)+"px";const count=$("aiCharCount");if(count)count.textContent=input.value.length+" / 1200"}
 function askNexfitAI(){
  const input=$("aiQuestion"),question=input.value.trim();if(!question)return;
- const chat=$("aiChat"),send=$("aiSendButton");if(send)send.disabled=true;
- const userMsg=document.createElement("div");userMsg.className="ai-message ai-user";userMsg.textContent=question;chat.append(userMsg);
- const answer=document.createElement("div");answer.className="ai-message ai-bot";const label=document.createElement("span");label.className="ai-bot-label";label.textContent="NEXFIT KOÇ";answer.append(label,document.createTextNode(nexfitAiReply(question)));chat.append(answer);
- input.value="";input.style.height="42px";resizeAiQuestion(input);chat.scrollTop=chat.scrollHeight;if(send)send.disabled=false;input.focus();
+ const send=$("aiSendButton");if(send)send.disabled=true;
+ appendNexfitAIMessage("user",question);input.value="";input.style.height="42px";resizeAiQuestion(input);
+ try{appendNexfitAIMessage("assistant",nexfitAiReply(question))}
+ catch(error){console.error("NEXFIT AI coach error:",error);appendNexfitAIMessage("assistant","Kayıtlarını analiz ederken bir sorun oluştu. Sayfayı yenileyip tekrar deneyebilirsin. Kayıtların silinmedi.")}
+ saveNexfitAIChat();if(send)send.disabled=false;input.focus();
 }
 function askNexfitQuick(question){const input=$("aiQuestion");input.value=question;resizeAiQuestion(input);askNexfitAI()}
 
