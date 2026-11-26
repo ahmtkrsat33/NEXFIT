@@ -108,13 +108,31 @@ section.page{min-width:0}
  .mobile-more-menu{display:flex;position:fixed;z-index:101;right:10px;bottom:calc(72px + env(safe-area-inset-bottom));width:min(260px,calc(100vw - 20px));padding:8px;flex-direction:column;gap:4px;background:#121a14;border:1px solid #354638;border-radius:15px;box-shadow:0 15px 45px #000b}
  .mobile-more-menu.hidden{display:none}.mobile-more-menu button{border:0;background:transparent;color:#eef5ee;text-align:left;padding:13px;border-radius:9px;font-size:13px}
  .mobile-more-menu button:hover{background:#223023;color:var(--green)}
-}@media(max-width:600px){
- .layout{display:block}
- .sidebar{width:100%;padding:12px 10px;display:block;border-right:0;border-bottom:1px solid var(--line)}
- .sidebar .logo{margin:0 8px 12px;font-size:24px}
+}.mobile-menu-toggle{display:none}
+.mobile-brand-row{display:contents}
+@media(max-width:600px){
+ .layout{display:block;padding-bottom:18px}
+ .sidebar{position:relative;width:100%;padding:12px 14px;display:block;border-right:0;border-bottom:1px solid var(--line);background:#0c100d;z-index:50}
+ .mobile-brand-row{display:flex;align-items:center;gap:13px;min-height:38px}
+ .mobile-menu-toggle{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;flex-shrink:0;border:1px solid #344334;border-radius:11px;background:#172019;color:var(--green);font-size:23px;line-height:1}
+ .sidebar .logo{margin:0;font-size:24px}
  .sidebar .logo small{display:none}
  .navlabel,.sidebottom{display:none}
- .navbtn{width:auto;padding:10px 9px;font-size:11px;margin:2px}
+ .sidebar .navbtn{display:none;width:100%;padding:13px 14px;font-size:14px;margin:4px 0;text-align:left;border-radius:10px}
+ .sidebar.mobile-open .navbtn{display:block}
+ .sidebar.mobile-open .navlabel{display:block;margin:14px 10px 7px}
+ .sidebar.mobile-open .sidebottom{display:block;margin-top:12px}
+ .main{padding:20px 13px}
+ .topbar{margin-bottom:20px}
+ h1{font-size:24px}
+ .stats{gap:9px}
+ .card{padding:16px}
+ .statnum{font-size:23px}
+ .week{gap:3px}
+ .day{font-size:9px;padding:10px 1px}
+ .day b{font-size:13px}
+ .pill{font-size:9px;padding:7px}
+}
  .main{padding:20px 13px}
  .topbar{margin-bottom:20px}
  h1{font-size:24px}
@@ -245,7 +263,7 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
 
 <div id="app" class="layout hidden">
  <aside class="sidebar">
-  <div class="logo">NEXFIT.<small>FITNESS OS</small></div>
+  <div class="mobile-brand-row"><button class="mobile-menu-toggle" type="button" aria-label="Menüyü aç" aria-expanded="false" onclick="toggleMobileNav()">☰</button><div class="logo">NEXFIT.<small>FITNESS OS</small></div></div>
   <div class="navlabel">ANA MENÜ</div>
   <button class="navbtn active" onclick="tab('dashboard',this)">◈　Genel Bakış</button>
   <button class="navbtn" onclick="tab('workout',this)">▤　Antrenmanlar</button>
@@ -258,20 +276,6 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
   <button class="navbtn" onclick="logout()">↪　Çıkış Yap</button>
   <div class="sidebottom">NEXFIT PERFORMANCE<br>BUILD YOUR BEST SELF.</div>
  </aside>
- <nav class="mobile-dock" aria-label="Mobil ana menü">
-  <button class="dock-item active" data-tab="dashboard" onclick="tab('dashboard',this)"><span>⌂</span><small>Ana Sayfa</small></button>
-  <button class="dock-item" data-tab="workout" onclick="tab('workout',this)"><span>▤</span><small>Antrenman</small></button>
-  <button class="dock-item" data-tab="nutrition" onclick="tab('nutrition',this)"><span>◉</span><small>Beslenme</small></button>
-  <button class="dock-item" data-tab="programs" onclick="tab('programs',this)"><span>✦</span><small>Programlar</small></button>
-  <button class="dock-item" id="dockMoreButton" onclick="toggleMobileMore()"><span>•••</span><small>Daha Fazla</small></button>
- </nav>
- <div id="mobileMoreMenu" class="mobile-more-menu hidden">
-  <button onclick="tab('history');closeMobileMore()">▥　Kayıtlarım</button>
-  <button onclick="tab('exercises');closeMobileMore()">💪　Hareket Kütüphanesi</button>
-  <button onclick="tab('wellness');closeMobileMore()">✦　Vücut & Yaşam</button>
-  <button onclick="logout()">↪　Çıkış Yap</button>
- </div>
-
  <main class="main">
   <div class="topbar">
    <div>
@@ -499,13 +503,24 @@ async function logout(){
  $("password").value="";
  setMode("login");
 }
+function toggleMobileNav(){
+ const side=document.querySelector(".sidebar");if(!side)return;
+ const open=side.classList.toggle("mobile-open");
+ const button=side.querySelector(".mobile-menu-toggle");
+ if(button){button.setAttribute("aria-expanded",String(open));button.textContent=open?"×":"☰"}
+}
+function closeMobileNav(){
+ const side=document.querySelector(".sidebar");if(!side)return;
+ side.classList.remove("mobile-open");
+ const button=side.querySelector(".mobile-menu-toggle");
+ if(button){button.setAttribute("aria-expanded","false");button.textContent="☰"}
+}
 function tab(id,btn){
  ["dashboard","workout","programs","nutrition","history","exercises","wellness"].forEach(x=>$(x).classList.toggle("hidden",x!==id));
  document.querySelectorAll(".navbtn").forEach(x=>x.classList.remove("active"));
  document.querySelectorAll(".dock-item").forEach(x=>x.classList.toggle("active",x.dataset.tab===id));
  if(btn&&btn.classList.contains("navbtn"))btn.classList.add("active");
- if(btn&&btn.classList.contains("dock-item"))btn.classList.add("active");
- closeMobileMore();
+ closeMobileNav();
  $("welcome").textContent={dashboard:"Genel Bakış",workout:"Antrenman Merkezi",programs:"Programlarım",nutrition:"Beslenme Merkezi",history:"Kayıtlarım",exercises:"Hareket Kütüphanesi",wellness:"Vücut & Yaşam Takibi"}[id];
  if(id==="dashboard"||id==="history")loadData();
  if(id==="programs")loadTrainingPlans();
