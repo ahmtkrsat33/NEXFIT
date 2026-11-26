@@ -132,6 +132,12 @@ input:focus{border-color:var(--green)}
 .sidebottom{margin-top:auto;color:#748073;font-size:10px;line-height:2;letter-spacing:1px}
 .main{flex:1;min-width:0;padding:30px 4%;max-width:1550px}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:30px}
+.topbar-right{display:flex;align-items:center;gap:22px}
+.founder-signature{display:flex;flex-direction:column;align-items:flex-end;gap:1px;padding:2px 0 3px 15px;border-left:1px solid #344334;white-space:nowrap}
+.signature-mark{font-family:"Segoe Script","Brush Script MT",cursive;font-size:25px;font-style:italic;font-weight:600;letter-spacing:.3px;color:#d8e8d1;text-shadow:0 0 14px rgba(128,185,44,.18);transform:rotate(-3deg);transform-origin:right center}
+.signature-caption{font-size:8px;letter-spacing:2.2px;color:var(--green);font-weight:800}
+@media(max-width:600px){.topbar{align-items:flex-start}.topbar-right{flex-direction:column;align-items:flex-end;gap:8px}.founder-signature{padding-left:9px}.signature-mark{font-size:20px}.signature-caption{font-size:7px}.topbar .pill{font-size:9px;padding:6px 9px}}
+
 .eyebrow{color:var(--green);font-size:10px;letter-spacing:2px;font-weight:bold}
 h1{font-size:29px;margin:8px 0}
 h2{font-size:19px;margin:0 0 17px}
@@ -378,7 +384,13 @@ label{font-size:11px;font-weight:750;letter-spacing:.65px;text-transform:upperca
     <h1 id="welcome">Genel Bakış</h1>
     <div class="muted" id="today"></div>
    </div>
-   <div class="pill">● SYSTEM ONLINE</div>
+   <div class="topbar-right">
+    <div class="pill">● SYSTEM ONLINE</div>
+    <div class="founder-signature" aria-label="A. Kürşat Ş. imzası">
+     <span class="signature-mark">A. Kürşat Ş.</span>
+     <span class="signature-caption">FOUNDER · NEXFIT</span>
+    </div>
+   </div>
   </div>
 
   <section id="dashboard" class="page">
